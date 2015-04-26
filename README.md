@@ -1,7 +1,7 @@
 # neovim-client
 
-A Neovim client library for useful for creating neovim plugins written in
-Clojure, using msgpack-rpc to communicate with Neovim.
+A Neovim client library for creating neovim plugins written in Clojure, using
+msgpack-rpc to communicate with Neovim.
 
 ## TODO
 
@@ -69,7 +69,7 @@ separate library.
 A Leiningen template for a Neovim plugin, using neovim-client, and including
 the necessary VimScript hooks.
 
-### Get Rid of Leinigen?
+### Stop Using lein run
 
 Using a VimScript hook, Neovim calls `lein run` to launch the plugin. This isn't
 really Leiningen's job, but it's convenient for a few reasons:
