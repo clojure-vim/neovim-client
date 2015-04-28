@@ -21,3 +21,6 @@
   "Construct a msgpack-rpc request message."
   [type args]
   [0 (msg-id) type args])
+
+(def id second)
+(def value last)

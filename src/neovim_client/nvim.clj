@@ -14,8 +14,21 @@
   []
   (rpc/send-message! (->request-msg "vim_get_api_info" [])))
 
+(defn get-current-line
+  []
+  (rpc/send-message! (->request-msg "vim_get_current_line" [])))
+
+(defn set-current-line!
+  [line]
+  (rpc/send-message! (->request-msg "vim_set_current_line" [line])))
+
+;; ***** Experimental *****
+
+(defn hsplit! [] (run-command! "split"))
+(defn vsplit! [] (run-command! "vsplit"))
+
 ;; TODO
-;msg [0 (System/currentTimeMillis) "vim_get_current_line" []]
-;msg [0 (System/currentTimeMillis) "vim_get_current_buffer" []]
-;msg [0 (System/currentTimeMillis) "vim_get_buffers" []]
+;; vim_get_current_buffer
+;; vim_get_buffers
+;; (see get_api_info)
  
