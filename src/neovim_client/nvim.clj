@@ -2,6 +2,8 @@
   (:require [neovim-client.message :refer [->request-msg]]
             [neovim-client.rpc :as rpc]))
 
+;; ***** Public *****
+
 (def connect! rpc/connect!)
 
 ;; TODO - Check for connection, before allowing commands?
@@ -22,13 +24,26 @@
   [line]
   (rpc/send-message! (->request-msg "vim_set_current_line" [line])))
 
+(defn get-current-buffer
+  []
+  (rpc/send-message! (->request-msg "vim_get_current_buffer" [])))
+
+(defn get-buffers
+  []
+  (rpc/send-message! (->request-msg "vim_get_buffers" [])))
+
+(defn get-buffer-line-count
+  [buffer]
+  (rpc/send-message! (->request-msg "buffer_line_count" [buffer])))
+
+(defn buffer-set-line!
+  [buffer line-num line]
+  (rpc/send-message! (->request-msg "buffer_set_line" [buffer line-num line])))
+
 ;; ***** Experimental *****
 
 (defn hsplit! [] (run-command! "split"))
 (defn vsplit! [] (run-command! "vsplit"))
 
 ;; TODO
-;; vim_get_current_buffer
-;; vim_get_buffers
-;; (see get_api_info)
- 
+;; the rest of the functions in (get_api_info)

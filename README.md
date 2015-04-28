@@ -5,8 +5,9 @@ msgpack-rpc to communicate with Neovim.
 
 ## TODO
 
-* proper logging, debug which we can turn off
-* more higher-level nvim api stuff to show off
+* Response error handling.
+* Proper logging, debug which we can turn off.
+* More higher-level nvim api stuff to show off.
 
 ## Dependencies
 
@@ -62,7 +63,7 @@ is seriosly flawed.
 TODO links
 
 Have we implemented msgpack-rpc? Are we close? If so, possibly extract into a
-separate library.
+separate library. Would need to add in the join and getResult possibly.
 
 ### Leiningen Template
 

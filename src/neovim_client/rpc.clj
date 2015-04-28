@@ -78,3 +78,4 @@
   (let [p (promise)]
     (send-message-async! msg (partial deliver p))
     @p))
+

@@ -5,7 +5,9 @@
 
 (defn unpack-rec
     [t]
-    (if (coll? t)
+    t
+    ;; TODO fix this - we lose the original data type
+    #_(if (coll? t)
       (cons (unpack-rec (first t)) (unpack-rec (next t)))
       (if (= byte-array-type (type t))
         (String. t)
