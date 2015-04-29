@@ -47,7 +47,14 @@
 
 ;; ***** Experimental *****
 
+(defn buffer-update-lines!
+  "Alter each line of the buffer using the function."
+  [buffer update-fn]
+  (doseq [n (range (get-buffer-line-count buffer))]
+    (buffer-set-line! buffer n (update-fn (buffer-get-line buffer n)))))
+
 (defn buffer-get-text
+  "Get the buffer's text as a single string."
   [buffer]
   (let [buf-size (get-buffer-line-count buffer)
         lines (map (partial buffer-get-line buffer) (range buf-size))]
