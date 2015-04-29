@@ -1,5 +1,6 @@
 (ns neovim-client.nvim
-  (:require [neovim-client.message :refer [->request-msg]]
+  (:require [clojure.string :as str]
+            [neovim-client.message :refer [->request-msg]]
             [neovim-client.rpc :as rpc]))
 
 ;; ***** Public *****
@@ -40,10 +41,27 @@
   [buffer line-num line]
   (rpc/send-message! (->request-msg "buffer_set_line" [buffer line-num line])))
 
+(defn buffer-get-line
+  [buffer line-num]
+  (rpc/send-message! (->request-msg "buffer_get_line" [buffer line-num])))
+
 ;; ***** Experimental *****
 
-(defn hsplit! [] (run-command! "split"))
-(defn vsplit! [] (run-command! "vsplit"))
+(defn buffer-get-text
+  [buffer]
+  (let [buf-size (get-buffer-line-count buffer)
+        lines (map (partial buffer-get-line buffer) (range buf-size))]
+    (str/join "\n" lines)))
+
+;; TODO - make it wipe out text in the buffer after the last line of new text.
+(defn buffer-set-text!
+  [buffer text]
+  (let [lines (str/split text #"\n")]
+    (doseq [n (range (count lines))]
+      (buffer-set-line! buffer n (nth lines n)))))
+
+(defn hsplit! [] (run-command! "new"))
+(defn vsplit! [] (run-command! "vnew"))
 
 ;; TODO
 ;; the rest of the functions in (get_api_info)
