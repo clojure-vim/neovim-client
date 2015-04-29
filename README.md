@@ -3,9 +3,10 @@
 A Neovim client library for creating neovim plugins written in Clojure, using
 msgpack-rpc to communicate with Neovim.
 
+Note that this is pretty much reference implementation quality at best -- nothing Clojars worthy as yet.
+
 ## TODO
 
-* Video of repl interaction.
 * Sample plugin.
 * Response error handling.
 * More higher-level nvim api stuff to show off.
@@ -36,10 +37,10 @@ After cloning this repostiory
     lein repl
     neovim-client.nvim=> (connect! "localhost" 7777)
     ...
-    neovim-client.nvim=> (run-command! "vsplit")
+    neovim-client.nvim=> (run-command! ":echo 'Hello Neovim!'")
     ...
 
-TODO video
+[![Repling Neovim](http://img.youtube.com/vi/g-9DdVwbSTo/0.jpg)](https://www.youtube.com/watch?v=g-9DdVwbSTo)
 
 ### Neovim Plugin
 
