@@ -1,7 +1,7 @@
 (ns neovim-client.rpc
   (:require [clojure.core.async :as async]
             [msgpack.core :as msgpack]
-            [neovim-client.message :refer [unpack-rec id value]])
+            [neovim-client.message :refer [id value]])
   (:import [java.io DataInputStream DataOutputStream]
            [java.net Socket]))
 
@@ -17,7 +17,7 @@
     (async/go
       (while true
         (println "*** waiting for input stream ***")
-        (let [msg (unpack-rec (msgpack/unpack-stream input-stream))]
+        (let [msg (msgpack/unpack-stream input-stream)]
           (println "***")
           (println "stream -> msg -> in chan: " msg)
           (println "***")
