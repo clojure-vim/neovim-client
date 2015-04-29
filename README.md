@@ -5,8 +5,10 @@ msgpack-rpc to communicate with Neovim.
 
 ## TODO
 
+* Proper logging, debug which we can turn off (important for stdio).
+* Video of repl interaction.
+* Sample plugin.
 * Response error handling.
-* Proper logging, debug which we can turn off.
 * More higher-level nvim api stuff to show off.
 
 ## Dependencies
