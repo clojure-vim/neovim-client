@@ -1,7 +1,7 @@
 # neovim-client
 
-A Neovim client library for creating neovim plugins written in Clojure, using
-msgpack-rpc to communicate with Neovim.
+A Neovim client library for creating plugins written in Clojure, using
+msgpack-rpc.
 
 Note that this is pretty much reference implementation quality at best -- nothing Clojars worthy as yet.
 
@@ -15,7 +15,7 @@ Note that this is pretty much reference implementation quality at best -- nothin
 
 ### Neovim
 
-TODO
+I've been building from [master](https://github.com/neovim/neovim).
 
 ### Leiningen (master)
 
@@ -25,6 +25,12 @@ the current Leiningen release won't cut it. So clone the repo, checkout master,
 and build it. See Leiningen's
 [CONTRIBUTING.md](https://github.com/technomancy/leiningen/blob/master/CONTRIBUTING.md#bootstrapping)
 for instructions.
+
+### Java
+
+You've probably already got this if you're using Clojure. If not, whatever JVM your package manager installs should work.
+
+## Usage
 
 ### Repl
 
