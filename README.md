@@ -7,7 +7,6 @@ Note that this is pretty much reference implementation quality at best -- nothin
 
 ## TODO
 
-* Sample plugin.
 * Response error handling.
 * More higher-level nvim api stuff to show off.
 
@@ -38,7 +37,7 @@ Launch Neovim, explicitly setting the NVIM_LISTEN_ADDRESS
 
     NVIM_LISTEN_ADDRESS=127.0.0.1:7777 nvim
 
-After cloning this repostiory
+From the cloned repository's directory:
 
     lein repl
     neovim-client.nvim=> (connect! "localhost" 7777)
@@ -50,7 +49,20 @@ After cloning this repostiory
 
 ### Neovim Plugin
 
-TODO use included sample, uses stdio, .vim hooks
+For now (no Clojars yet), we need neovim-client installed locally, so from
+the cloned repository's directory:
+
+    lein install
+
+Install sample-plugin however you normally do it. For example, using Vundle
+you'd add the following line to your .vimrc:
+
+    Plugin 'file:///path/to/neovim-client', {'rtp': 'sample-plugin/'}
+
+Finally, to invoke the plugin launch nvim and run:
+
+    :VundleInstall
+    :call RunSamplePlugin()
 
 ## Future
 
