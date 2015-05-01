@@ -8,7 +8,7 @@ Note that this is pretty much reference implementation quality at best -- nothin
 ## TODO
 
 * Response error handling.
-* More higher-level nvim api stuff to show off.
+* More higher-level nvim api.
 
 ## Dependencies
 
@@ -66,24 +66,13 @@ Finally, to invoke the plugin launch nvim and run:
 
 ## Future
 
-### Is This Wrong?
+### Tighter Integration with Neovim
 
-This works, but is it the best road to creating Neovim plugins with Clojure?
+Neovim's strategy for [remote plugins](http://neovim.io/doc/user/remote_plugin.html#remote-plugin) says that it's ok to create a remote plugins as "arbitrary programs that communicate directly with the high-level Nvim API and are called via [msgpack-rpc]". That's exactly what the included sample-plugin does (utilizing neovim-client). 
 
-neovim-client includes some functionality similar to the canonical neovim
-plugin client library, [python-client](https://github.com/neovim/python-client).
-However, so far, the documentation surrounding Neovim plugins is [still
-congealing](https://github.com/neovim/neovim/issues/1929).
+However, it goes on to outline a better approach, utilizing a "plugin host". While neovim-client could potentially fill that role, considerably more work is needed.
 
-Likely, neovim-client is on the right track, while the included sample plugin
-is seriosly flawed.
-
-### msgpack-rpc
-
-TODO links
-
-Have we implemented msgpack-rpc? Are we close? If so, possibly extract into a
-separate library. Would need to add in the join and getResult possibly.
+The bottom line is this works, and possibly using ClojureScript w/ node.js, it could be fast too!
 
 ### Leiningen Template
 
@@ -96,14 +85,7 @@ Using a VimScript hook, Neovim calls `lein run` to launch the plugin. This isn't
 really Leiningen's job, but it's convenient for a few reasons:
 
 * Single script to distribute, rather than clojure.jar, plugin jar, etc.
-* Makes it possible to distribute .clj plugin source.
-
-### First-Class Clojure Support?
-
-Additionally, while remote plugins get the job done, what would it take to
-provide first-class support for Clojure from within Neovim? In other words:
-
-    :clj (conj [0 1 2] (+ 1 1 1)
+* Makes it easy for a plugin user to modify it - just edit .clj source.
 
 ## License
 
