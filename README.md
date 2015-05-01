@@ -1,14 +1,11 @@
 # neovim-client
 
 A Neovim client library for creating plugins written in Clojure, using
-msgpack-rpc.
+msgpack-rpc + a sample plugin.
 
-Note that this is pretty much reference implementation quality at best -- nothing Clojars worthy as yet.
-
-## TODO
-
-* Response error handling.
-* More higher-level nvim api.
+Note that this is pretty much reference implementation quality at best 
+-- nothing Clojars worthy as yet. The ultimate goal here is the easiest,
+most effective possible Vim plugins written with Clojure.
 
 ## Dependencies
 
