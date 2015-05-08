@@ -66,7 +66,7 @@ Finally, to invoke the plugin launch nvim and run:
 
 #### Simple Plugin
 
-   :call RunSamplePluginSimple()
+    :call RunSamplePluginSimple()
 
 #### Count Plugin
 
