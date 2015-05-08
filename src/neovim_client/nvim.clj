@@ -6,6 +6,7 @@
 ;; ***** Public *****
 
 (def connect! rpc/connect!)
+(def register-method! rpc/register-method!)
 
 ;; TODO - Check for connection, before allowing commands?
 

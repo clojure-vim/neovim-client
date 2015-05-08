@@ -2,13 +2,20 @@
   (:require [clojure.core.async :as async]
             [clojure.tools.logging :as log]
             [msgpack.core :as msgpack]
-            [neovim-client.message :refer [id value]])
+            [neovim-client.message :refer [id value msg-type method params
+                                           ->response-msg]])
   (:import [java.io DataInputStream DataOutputStream]
            [java.net Socket]))
 
 (def out-chan (atom nil))
 (def in-chan (atom nil))
 (def msg-table (atom {}))
+(def method-table (atom {}))
+
+(defn method-not-found
+  [msg]
+  (log/error "method not found for msg " msg)
+  (str "method not found - " (method msg)))
 
 (defn create-input-channel
   "Read messages from the input stream, put them on a channel."
@@ -41,6 +48,8 @@
           (write-msg! (msgpack/pack msg) output-stream))))
     chan))
 
+(declare send-message-async!)
+
 (defn connect*
   [input-stream output-stream]
   (reset! in-chan (create-input-channel input-stream))
@@ -50,12 +59,17 @@
   (async/go
     (while true
       ;; TODO - let the in-chan, if we leave this code here.
-      ;; TODO - support requests from the server?
-      (let [msg (async/<! @in-chan)
-            fn (:fn (get @msg-table (id msg)))]
-        (swap! msg-table dissoc (id msg))
-        (fn (value msg))))))
+      (let [msg (async/<! @in-chan)]
+        ;; TODO magic numbers!
+        (cond (= 1 (msg-type msg)) ;; Response
+              (let [f (:fn (get @msg-table (id msg)))]
+                (swap! msg-table dissoc (id msg))
+                (f (value msg)))
 
+              (= 0 (msg-type msg)) ;; Request
+              (let [f (get @method-table (method msg) method-not-found)
+                    result (f msg)]
+                (send-message-async! (->response-msg (id msg) result) nil)))))))
 ;; ***** Public *****
 
 (defn connect!
@@ -67,7 +81,9 @@
 
 (defn send-message-async!
   [msg callback-fn]
-  (swap! msg-table assoc (id msg) {:msg msg :fn callback-fn})
+  ;; TODO magic number!
+  (if (= 0 (msg-type msg))
+    (swap! msg-table assoc (id msg) {:msg msg :fn callback-fn}))
   (async/put! @out-chan msg))
 
 (defn send-message!
@@ -75,3 +91,7 @@
   (let [p (promise)]
     (send-message-async! msg (partial deliver p))
     @p))
+
+(defn register-method!
+  [method f]
+  (swap! method-table assoc method f))
