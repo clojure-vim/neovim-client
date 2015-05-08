@@ -72,7 +72,7 @@ Finally, to invoke the plugin launch nvim and run:
 
 This plugin stays running, and maintains state. Additionally, it shows how
 plugins are actually servers, which Neovim can make requests to via
-rpcruest().
+rpcrequest().
 
     :echo SamplePluginCount() ;; repeat!
 
