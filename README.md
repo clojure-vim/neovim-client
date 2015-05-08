@@ -44,22 +44,37 @@ From the cloned repository's directory:
 
 [![Repling Neovim](http://img.youtube.com/vi/g-9DdVwbSTo/0.jpg)](https://www.youtube.com/watch?v=g-9DdVwbSTo)
 
-### Neovim Plugin
+### Sample Plugins
+
+Several sample plugins -- consumers of neovim-client -- are included.
+
+#### Installation
 
 For now (no Clojars yet), we need neovim-client installed locally, so from
 the cloned repository's directory:
 
     lein install
 
-Install sample-plugin however you normally do it. For example, using Vundle
-you'd add the following line to your .vimrc:
+Install sample-plugin-whatever however you normally do it. For example, using
+Vundle you'd add the following line to your .vimrc:
 
-    Plugin 'file:///path/to/neovim-client', {'rtp': 'sample-plugin/'}
+    Plugin 'file:///path/to/neovim-client', {'rtp': 'sample-plugin-whatever/'}
 
 Finally, to invoke the plugin launch nvim and run:
 
     :VundleInstall
-    :call RunSamplePlugin()
+
+#### Simple Plugin
+
+   :call RunSamplePluginSimple()
+
+#### Count Plugin
+
+This plugin stays running, and maintains state. Additionally, it shows how
+plugins are actually servers, which Neovim can make requests to via
+rpcruest().
+
+    :echo SamplePluginCount() ;; repeat!
 
 ## Future
 

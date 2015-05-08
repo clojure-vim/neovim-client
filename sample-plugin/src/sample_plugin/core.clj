@@ -5,6 +5,18 @@
 (defn -main
   [& args]
   (nvim/connect!)
-  (nvim/hsplit!)
-  (let [cur-buf (nvim/get-current-buffer)]
-    (nvim/buffer-set-text! cur-buf "Sample plugin was here!")))
+
+  (let [x (atom 0)]
+    (nvim/register-method!
+      "count"
+      (fn [msg]
+        (swap! x inc)
+        @x)))
+
+  ;; Stay alive for a minute!
+  (dotimes [n 60]
+    (if (= 0 (mod n 10))
+      (nvim/run-command! (str ":echo 'plugin alive for " n " seconds.'")))
+    (Thread/sleep 1000))
+
+  (nvim/run-command! ":echo 'plugin stopping.'"))
