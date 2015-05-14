@@ -14,6 +14,10 @@
   [cmd-str]
   (rpc/send-message! (->request-msg "vim_command" [cmd-str])))
 
+(defn run-command-async!
+  [cmd-str f]
+  (rpc/send-message-async! (->request-msg "vim_command" [cmd-str]) f))
+
 (defn get-api-info
   []
   (rpc/send-message! (->request-msg "vim_get_api_info" [])))
