@@ -10,45 +10,35 @@
 
 ;; TODO - Check for connection, before allowing commands?
 
-(defn run-command!
-  [cmd-str]
-  (rpc/send-message! (->request-msg "vim_command" [cmd-str])))
+(defn send-message!
+  [vim-command & args]
+  (rpc/send-message! (->request-msg vim-command (or args []))))
+
+(defn run-command!  [cmd-str] (send-message! "vim_command" cmd-str))
 
 (defn run-command-async!
   [cmd-str f]
   (rpc/send-message-async! (->request-msg "vim_command" [cmd-str]) f))
 
-(defn get-api-info
-  []
-  (rpc/send-message! (->request-msg "vim_get_api_info" [])))
+(defn get-api-info [] (send-message! "vim_get_api_info"))
 
-(defn get-current-line
-  []
-  (rpc/send-message! (->request-msg "vim_get_current_line" [])))
+(defn get-current-line [] (send-message! "vim_get_current_line"))
 
-(defn set-current-line!
-  [line]
-  (rpc/send-message! (->request-msg "vim_set_current_line" [line])))
+(defn set-current-line!  [line] (send-message! "vim_set_current_line" line))
 
-(defn get-current-buffer
-  []
-  (rpc/send-message! (->request-msg "vim_get_current_buffer" [])))
+(defn get-current-buffer [] (send-message! "vim_get_current_buffer"))
 
-(defn get-buffers
-  []
-  (rpc/send-message! (->request-msg "vim_get_buffers" [])))
+(defn get-buffers [] (send-message! "vim_get_buffers"))
 
-(defn get-buffer-line-count
-  [buffer]
-  (rpc/send-message! (->request-msg "buffer_line_count" [buffer])))
+(defn get-buffer-line-count [buffer] (send-message! "buffer_line_count" buffer))
 
 (defn buffer-set-line!
   [buffer line-num line]
-  (rpc/send-message! (->request-msg "buffer_set_line" [buffer line-num line])))
+  (send-message! "buffer_set_line" buffer line-num line))
 
 (defn buffer-get-line
   [buffer line-num]
-  (rpc/send-message! (->request-msg "buffer_get_line" [buffer line-num])))
+  (send-message! "buffer_get_line" buffer line-num))
 
 ;; ***** Experimental *****
 
