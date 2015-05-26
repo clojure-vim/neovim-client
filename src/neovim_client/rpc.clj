@@ -3,7 +3,8 @@
             [clojure.tools.logging :as log]
             [msgpack.core :as msgpack]
             [neovim-client.message :refer [id value msg-type method params
-                                           ->response-msg]])
+                                           ->response-msg]
+                                   :as msg])
   (:import [java.io DataInputStream DataOutputStream]
            [java.net Socket]))
 
@@ -60,16 +61,18 @@
     (while true
       ;; TODO - let the in-chan, if we leave this code here.
       (let [msg (async/<! @in-chan)]
-        ;; TODO magic numbers!
-        (cond (= 1 (msg-type msg)) ;; Response
-              (let [f (:fn (get @msg-table (id msg)))]
-                (swap! msg-table dissoc (id msg))
-                (f (value msg)))
+        (condp = (msg-type msg)
 
-              (= 0 (msg-type msg)) ;; Request
-              (let [f (get @method-table (method msg) method-not-found)
-                    result (f msg)]
-                (send-message-async! (->response-msg (id msg) result) nil)))))))
+          msg/+response+
+          (let [f (:fn (get @msg-table (id msg)))]
+            (swap! msg-table dissoc (id msg))
+            (f (value msg)))
+
+          msg/+request+
+          (let [f (get @method-table (method msg) method-not-found)
+                result (f msg)]
+            (send-message-async! (->response-msg (id msg) result) nil)))))))
+
 ;; ***** Public *****
 
 (defn connect!
@@ -82,7 +85,7 @@
 (defn send-message-async!
   [msg callback-fn]
   ;; TODO magic number!
-  (if (= 0 (msg-type msg))
+  (if (= msg/+request+ (msg-type msg))
     (swap! msg-table assoc (id msg) {:msg msg :fn callback-fn}))
   (async/put! @out-chan msg))
 

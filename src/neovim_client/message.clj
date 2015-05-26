@@ -1,5 +1,8 @@
 (ns neovim-client.message)
 
+(def +request+ 0)
+(def +response+ 1)
+
 ;; TODO - do this right!
 (defn msg-id
   "Get a unique message id."
