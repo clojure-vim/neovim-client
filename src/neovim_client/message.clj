@@ -3,8 +3,7 @@
 (def +request+ 0)
 (def +response+ 1)
 
-;; TODO - do this right!
-(defn msg-id
+(defn gen-msg-id
   "Get a unique message id."
   []
   (System/currentTimeMillis))
@@ -12,13 +11,13 @@
 (defn ->request-msg
   "Construct a msgpack-rpc request message."
   [type args]
-  [0 (msg-id) type args])
+  [0 (gen-msg-id) type args])
 
 (defn ->response-msg
+  "Construct a msgpack-rpc response message."
   [id result]
   [1 id nil result])
 
-(def id second)
 
 ;; TODO - find better way to get [B type.
 (def byte-array-type (type (.getBytes "foo")))
@@ -33,11 +32,24 @@
 
       t))
 
-(def value (comp bytes->str last))
-
+;; ***** Accessor fns *****
 (def msg-type first)
+(def id second)
 
-;; TODO going to need to do bytes->str here too!
-(defn method [msg] (bytes->str (nth msg 2)))
+(defn request? [msg] (= +request+ (msg-type msg)))
+(defn response? [msg] (= +response+ (msg-type msg)))
 
-(defn params [msg] (nth msg 3))
+(defn value
+  [msg]
+  {:pre [(response? msg)]}
+  (bytes->str (last msg)))
+
+(defn method
+  [msg]
+  {:pre [(request? msg)]}
+  (bytes->str (nth msg 2)))
+
+(defn params
+  [msg]
+  {:pre [(request? msg)]}
+  (last msg))

@@ -84,7 +84,6 @@
 
 (defn send-message-async!
   [msg callback-fn]
-  ;; TODO magic number!
   (if (= msg/+request+ (msg-type msg))
     (swap! msg-table assoc (id msg) {:msg msg :fn callback-fn}))
   (async/put! @out-chan msg))
