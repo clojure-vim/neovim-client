@@ -6,7 +6,7 @@
 (defn gen-msg-id
   "Get a unique message id."
   []
-  (System/currentTimeMillis))
+  (System/nanoTime))
 
 (defn ->request-msg
   "Construct a msgpack-rpc request message."

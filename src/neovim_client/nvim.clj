@@ -36,9 +36,21 @@
   [buffer line-num line]
   (send-message! "buffer_set_line" buffer line-num line))
 
+(defn buffer-set-line-async!
+  ([buffer line-num line]
+   (buffer-set-line-async! buffer line-num line identity))
+  ([buffer line-num line f]
+   (rpc/send-message-async! (->request-msg "buffer_set_line"
+                                           [buffer line-num line]) f)))
+
 (defn buffer-get-line
   [buffer line-num]
   (send-message! "buffer_get_line" buffer line-num))
+
+(defn buffer-get-line-async
+  [buffer line-num f]
+  (rpc/send-message-async! (->request-msg "buffer_get_line"
+                                          [buffer line-num]) f))
 
 ;; ***** Experimental *****
 
@@ -46,7 +58,8 @@
   "Alter each line of the buffer using the function."
   [buffer update-fn]
   (doseq [n (range (get-buffer-line-count buffer))]
-    (buffer-set-line! buffer n (update-fn (buffer-get-line buffer n)))))
+    (buffer-get-line-async buffer n #(buffer-set-line-async! buffer n
+                                                             (update-fn %)))))
 
 (defn buffer-get-text
   "Get the buffer's text as a single string."
