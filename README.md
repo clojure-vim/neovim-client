@@ -13,7 +13,7 @@ most effective possible Vim plugins written with Clojure.
 
 I've been building from [master](https://github.com/neovim/neovim).
 
-### Leiningen (master)
+### Leiningen
 
 At least version 2.5.2 of [Leiningen](https://github.com/technomancy/leiningen/).
 
