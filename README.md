@@ -15,12 +15,7 @@ I've been building from [master](https://github.com/neovim/neovim).
 
 ### Leiningen (master)
 
-First, build Leiningen from master. Due to a
-[bug in handling stdio](https://github.com/technomancy/leiningen/issues/1857),
-the current Leiningen release won't cut it. So clone the repo, checkout master,
-and build it. See Leiningen's
-[CONTRIBUTING.md](https://github.com/technomancy/leiningen/blob/master/CONTRIBUTING.md#bootstrapping)
-for instructions.
+At least version 2.5.2 of [Leiningen](https://github.com/technomancy/leiningen/).
 
 ### Java
 
