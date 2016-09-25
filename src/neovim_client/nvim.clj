@@ -1,6 +1,6 @@
 (ns neovim-client.nvim
   (:require [clojure.string :as str]
-            [neovim-client.message :refer [->request-msg]]
+            [neovim-client.message :as message :refer [->request-msg]]
             [neovim-client.rpc :as rpc]))
 
 ;; ***** Public *****
@@ -26,11 +26,27 @@
 
 (defn set-current-line!  [line] (send-message! "vim_set_current_line" line))
 
-(defn get-current-buffer [] (send-message! "vim_get_current_buffer"))
+(defn get-current-buffer
+  ;; TODO: fix comment
+  "Returns ??? (object, map, ?) representing the current buffer."
+  []
+  (send-message! "vim_get_current_buffer"))
+
+(declare buffer-get-text)
+(defn get-current-buffer-async
+  "Like `get-current-buffer`, but async."
+  [f]
+  (rpc/send-message-async! (->request-msg "vim_get_current_buffer" []) f))
 
 (defn get-buffers [] (send-message! "vim_get_buffers"))
 
 (defn get-buffer-line-count [buffer] (send-message! "buffer_line_count" buffer))
+(defn get-buffer-line-count-async
+  "Like `get-buffer-line-count but async.
+
+  `f` callback function invoked with the buffer line count as an argument."
+  [buffer f]
+  (rpc/send-message-async! (->request-msg "buffer_line_count" [buffer]) f))
 
 (defn buffer-set-line!
   [buffer line-num line]
@@ -52,6 +68,11 @@
   (rpc/send-message-async! (->request-msg "buffer_get_line"
                                           [buffer line-num]) f))
 
+(defn buffer-get-lines-async
+  [buffer start end f]
+  (rpc/send-message-async! (->request-msg "buffer_get_line_slice"
+                                          [buffer start end true true]) f))
+
 ;; ***** Experimental *****
 
 (defn buffer-update-lines!
@@ -67,6 +88,12 @@
   (let [buf-size (get-buffer-line-count buffer)
         lines (map (partial buffer-get-line buffer) (range buf-size))]
     (str/join "\n" lines)))
+
+(defn get-current-buffer-text-async
+  "Convenience function to get the current buffer's text asynchronously."
+  [f]
+  (get-current-buffer-async
+    (fn [buffer] (buffer-get-lines-async buffer 0 -1 f))))
 
 ;; TODO - make it wipe out text in the buffer after the last line of new text.
 (defn buffer-set-text!

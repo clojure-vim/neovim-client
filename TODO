@@ -1,0 +1,42 @@
+TODO
+	[X] Make buffer-get-text-async work, just test it at the repl
+	[X] Get "eval-code" working
+	[_] Figure out how to accumulate / display results in vim
+	[_] Name vim functions correctly
+	[_] Pass host, port in connect
+
+Goals
+	-Zero vimscript (plugin written in clojure)
+	-Simplicity
+		Ex:
+			Don't modify behavior of stdio, stacktrace printing
+			Append results to a "repl" buffer
+		Code
+			No nrepl (no request / response)
+			No middleware
+			No vimscript
+			Clojure-only plugin
+			All results displayed in one place
+			One connection
+	-Run repl side-by-side with editor
+		Does not automatically start a repl
+		Forces you to explicity connect
+		One connection only `:call ConnectClojurePlugin(host, port)`
+		Accessible from vim buffer `:call ShowClojurePluginRepl()`
+
+Questions
+	Figwheel cljs-repl support
+
+Usage
+	add command line args to your project, so it starts socket repl
+	tell the plugin port (and host) to connect to
+
+Debugging notes
+	vim
+		rpcrequest(1, ...) <-- use channel 1, w/ tcp
+		don't do rpcstart
+	clj
+		connect! add localhost 7777
+		vim blocks if you make a synchronous call to clj which makes a sync
+		call back to vim -- use async!
+
