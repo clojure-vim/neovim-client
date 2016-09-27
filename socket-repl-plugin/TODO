@@ -1,11 +1,21 @@
 TODO
+	[_] Move this TODO to socket-repl-plugin
+		[_] Move all of the socket repl stuff to a plugin project
 	[X] Make buffer-get-text-async work, just test it at the repl
 	[X] Get "eval-code" working
 	[_] Figure out how to accumulate / display results in vim
+		append it all to a file
+		preferably a temp file (could be a lot of data)
+		don't keep it in memory
+		`:ShowRepl`
+			no vimscript, invoke a plugin function
+			show the contents of the temp file in the current buffer
+			make it autoread
 	[_] Name vim functions correctly
 	[_] Pass host, port in connect
 
 Goals
+	-Not a proper nRepl plugin, primary use is as an thought exercise
 	-Zero vimscript (plugin written in clojure)
 	-Simplicity
 		Ex:

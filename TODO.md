@@ -1,1 +1,0 @@
-* macros for nvim

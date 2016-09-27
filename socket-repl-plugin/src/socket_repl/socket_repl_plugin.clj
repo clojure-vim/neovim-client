@@ -1,4 +1,4 @@
-(ns neovim-client.socket-repl-plugin
+(ns socket-repl.socket-repl-plugin
   "A plugin which connects to a running socket repl and sends output back to
   Neovim."
   (:require
