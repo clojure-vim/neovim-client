@@ -13,7 +13,7 @@ function! StartIfNotRunning()
     endif
 endfunction
 
-function! EvalConnect()
+function! Connect()
     "call StartIfNotRunning()
     let res = rpcrequest(1, 'connect', [])
     return res

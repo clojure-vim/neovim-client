@@ -9,7 +9,10 @@
     (java.net Socket)
     (java.io PrintStream)))
 
+(def current-connection (atom nil))
+
 (defn connection
+  "Create a connection to a socket repl."
   [host port]
   (let [socket (java.net.Socket. "localhost" 5555)]
     {:host host
@@ -19,14 +22,18 @@
               PrintStream.)
      :in (io/reader socket)}))
 
-(defn eval*
+(defn write-code
+  "Writes a string of code to the socket repl connection."
   [{:keys [:out]} code-string]
   (.println out code-string)
   (.flush out))
 
-(def current-connection (atom nil))
-
 (defn connect!
+  "Connect to a socket repl. Adds the connection to the `current-connection`
+  atom. Creates `go-loop`s to delegate input from the socket to `handler` one
+  line at a time.
+
+  `handler` is a function which accepts one string argument."
   [host port handler]
   (let [conn (connection host port)
         chan (async/chan 10)]
@@ -47,9 +54,10 @@
                (recur))))
   "success")
 
-(defn eval*!
+(defn write-code!
+  "Like `write-code`, but uses the current socket repl connection."
   [code-string]
-  (eval* @current-connection code-string))
+  (write-code @current-connection code-string))
 
 (defn -main
   [& args]
@@ -81,9 +89,10 @@
            ;; TODO: send code being executed
            ;; back to vim, to show what actually
            ;; happened in the repl buffer
-           (eval*! x)))))
+           (write-code! x)))))
 
-  ;; TODO: When do we disconnect?
+  ;; TODO: Rather than an arbitrary timeout, the plugin should shut down
+  ;; when it has received no input for some time.
   (comment
     (dotimes [n 60]
       (if (= 0 (mod n 10))

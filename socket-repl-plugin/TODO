@@ -1,6 +1,5 @@
 TODO
-	[_] Move this TODO to socket-repl-plugin
-		[_] Move all of the socket repl stuff to a plugin project
+	[X] Move all of the socket repl stuff to a plugin project
 	[X] Make buffer-get-text-async work, just test it at the repl
 	[X] Get "eval-code" working
 	[_] Figure out how to accumulate / display results in vim
@@ -13,6 +12,7 @@ TODO
 			make it autoread
 	[_] Name vim functions correctly
 	[_] Pass host, port in connect
+	[_] Shut down the plugin if no input received for one minute
 
 Goals
 	-Not a proper nRepl plugin, primary use is as an thought exercise
