@@ -3,14 +3,13 @@ TODO
 	[X] Make buffer-get-text-async work, just test it at the repl
 	[X] Get "eval-code" working
 	[_] Figure out how to accumulate / display results in vim
-		append it all to a file
-		preferably a temp file (could be a lot of data)
-		don't keep it in memory
-		`:ShowRepl`
+		[X] append it all to a file
+		[X] preferably a temp file (could be a lot of data)
+		[_] `:ShowRepl`
 			no vimscript, invoke a plugin function
 			show the contents of the temp file in the current buffer
 			make it autoread
-	[_] Name vim functions correctly
+	[X] Name vim functions correctly
 	[_] Pass host, port in connect
 	[_] Shut down the plugin if no input received for one minute
 

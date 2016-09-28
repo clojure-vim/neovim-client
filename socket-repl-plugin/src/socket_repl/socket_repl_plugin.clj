@@ -7,9 +7,13 @@
     [neovim-client.nvim :as nvim])
   (:import
     (java.net Socket)
-    (java.io PrintStream)))
+    (java.io PrintStream File)))
 
 (def current-connection (atom nil))
+
+(defn output-file
+  []
+  (File/createTempFile "socket-repl" ".txt"))
 
 (defn connection
   "Create a connection to a socket repl."
@@ -28,6 +32,22 @@
   (.println out code-string)
   (.flush out))
 
+(defn write-code!
+  "Like `write-code`, but uses the current socket repl connection."
+  [code-string]
+  (write-code @current-connection code-string))
+
+(defn write-output
+  "Write a string to the output file."
+  [{:keys [:file]} string]
+  (.print file string)
+  (.flush file))
+
+(defn write-output!
+  "Like `write-output`, but uses the current socket repl connection."
+  [string]
+  (write-output @current-connection string))
+
 (defn connect!
   "Connect to a socket repl. Adds the connection to the `current-connection`
   atom. Creates `go-loop`s to delegate input from the socket to `handler` one
@@ -37,13 +57,15 @@
   [host port handler]
   (let [conn (connection host port)
         chan (async/chan 10)]
-    (reset! current-connection (assoc conn
-                                      :handler handler
-                                      :chan chan))
+    (reset! current-connection
+            (assoc conn
+                   :handler handler
+                   :chan chan
+                   :file (PrintStream. (output-file))))
 
     ;; input producer
     (go-loop []
-             (when-let [line (.readLine (:in conn))]
+             (when-let [line (str (.readLine (:in conn)) "\n")]
                (>! chan line)
                (recur)))
 
@@ -53,11 +75,6 @@
                (handler x)
                (recur))))
   "success")
-
-(defn write-code!
-  "Like `write-code`, but uses the current socket repl connection."
-  [code-string]
-  (write-code @current-connection code-string))
 
 (defn -main
   [& args]
@@ -71,8 +88,7 @@
       (connect! "localhost" "5555"
                 (fn [x]
                   (nvim/run-command-async!
-                    ;; TODO: Actually, append to a buffer?
-                    (format ":echo '%s'" (pr-str x))
+                    (write-output! x)
                     (fn [_] nil))))))
 
    (nvim/register-method!
@@ -85,10 +101,8 @@
      "eval-buffer"
      (fn [msg]
        (nvim/get-current-buffer-text-async
-         (fn [[x & _]]
-           ;; TODO: send code being executed
-           ;; back to vim, to show what actually
-           ;; happened in the repl buffer
+         (fn [x]
+           (write-output! (str x "\n"))
            (write-code! x)))))
 
   ;; TODO: Rather than an arbitrary timeout, the plugin should shut down

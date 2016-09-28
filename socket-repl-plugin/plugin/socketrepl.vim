@@ -18,17 +18,20 @@ function! Connect()
     let res = rpcrequest(1, 'connect', [])
     return res
 endfunction
+command! Connect call Connect()
 
 function! EvalBuffer()
     "call StartIfNotRunning()
     let res = rpcrequest(1, 'eval-buffer', [])
     return res
 endfunction
+command! EvalBuffer call EvalBuffer()
 
 function! EvalCode()
     "call StartIfNotRunning()
     let res = rpcrequest(g:channel, 'eval-code', [])
     return res
 endfunction
+command! EvalCode call EvalCode()
 
 echo 'socket repl plugin loaded!'

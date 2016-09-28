@@ -82,6 +82,7 @@
     (buffer-get-line-async buffer n #(buffer-set-line-async! buffer n
                                                              (update-fn %)))))
 
+ ;; TODO: Do this with `get-buffer-line-slice`
 (defn buffer-get-text
   "Get the buffer's text as a single string."
   [buffer]
@@ -93,7 +94,8 @@
   "Convenience function to get the current buffer's text asynchronously."
   [f]
   (get-current-buffer-async
-    (fn [buffer] (buffer-get-lines-async buffer 0 -1 f))))
+    (fn [buffer] (buffer-get-lines-async
+                   buffer 0 -1 (fn [lines] (f (str/join "\n" lines)))))))
 
 ;; TODO - make it wipe out text in the buffer after the last line of new text.
 (defn buffer-set-text!
