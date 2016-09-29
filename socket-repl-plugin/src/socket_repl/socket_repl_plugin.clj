@@ -39,9 +39,9 @@
 
 (defn write-output
   "Write a string to the output file."
-  [{:keys [:file]} string]
-  (.print file string)
-  (.flush file))
+  [{:keys [:file-stream]} string]
+  (.print file-stream string)
+  (.flush file-stream))
 
 (defn write-output!
   "Like `write-output`, but uses the current socket repl connection."
@@ -56,12 +56,14 @@
   `handler` is a function which accepts one string argument."
   [host port handler]
   (let [conn (connection host port)
-        chan (async/chan 10)]
+        chan (async/chan 10)
+        file (output-file)]
     (reset! current-connection
             (assoc conn
                    :handler handler
                    :chan chan
-                   :file (PrintStream. (output-file))))
+                   :file file
+                   :file-stream (PrintStream. file)))
 
     ;; input producer
     (go-loop []
@@ -104,6 +106,26 @@
          (fn [x]
            (write-output! (str x "\n"))
            (write-code! x)))))
+
+   (nvim/register-method!
+     "show-log"
+     (fn [msg]
+
+       (nvim/run-command-async!
+         (format ":term tail -f %s" (-> @current-connection
+                                        :file
+                                        .getAbsolutePath))
+         (fn [_]))
+
+       ;; Native solution, but only seems to work when the buffer has focus.
+       #_(nvim/run-command-async!
+         (format ":e %s" (-> @current-connection
+                             :file
+                             .getAbsolutePath))
+         (fn [_]
+           (nvim/run-command-async!
+             ":set updatetime=500 | au CursorHold <buffer> :e!"
+             (fn [_] nil))))))
 
   ;; TODO: Rather than an arbitrary timeout, the plugin should shut down
   ;; when it has received no input for some time.

@@ -34,4 +34,11 @@ function! EvalCode()
 endfunction
 command! EvalCode call EvalCode()
 
+function! ReplLog()
+    "call StartIfNotRunning()
+    let res = rpcrequest(1, 'show-log', [])
+    return res
+endfunction
+command! ReplLog call ReplLog()
+
 echo 'socket repl plugin loaded!'
