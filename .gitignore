@@ -10,3 +10,6 @@ pom.xml.asc
 /.nrepl-port
 .hgignore
 .hg/
+socket-repl-plugin/.lein-repl-history
+socket-repl-plugin/checkouts
+socket-repl-plugin/target
