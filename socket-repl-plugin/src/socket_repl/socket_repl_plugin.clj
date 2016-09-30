@@ -4,12 +4,34 @@
   (:require
     [clojure.java.io :as io]
     [clojure.core.async :as async :refer [go go-loop >! <!]]
+    [clojure.string :as string]
     [neovim-client.nvim :as nvim])
   (:import
     (java.net Socket)
     (java.io PrintStream File)))
 
 (def current-connection (atom nil))
+
+(defn position
+  "Find the position in a code string given line and column."
+  [code-str [y x]]
+  (->> code-str
+       string/split-lines
+       (take (dec y))
+       (string/join "\n")
+       count
+       (+ (inc x))))
+
+(defn get-form-at
+  "Returns the enclosing form from a string a code using [row col]
+  coordinates."
+  [code-str coords]
+  (let [pos (position code-str coords)]
+    (read-string
+      ;; Start at the last index of paren on or before `pos`, read a form.
+      (subs code-str (if (= \( (.charAt code-str pos))
+                       pos
+                       (.lastIndexOf (subs code-str 0 pos) "("))))))
 
 (defn output-file
   []
@@ -96,8 +118,21 @@
    (nvim/register-method!
      "eval-code"
      (fn [msg]
-       ;; TODO: Get the cursor location, find current form
-       ))
+       (nvim/get-cursor-location-async
+         (fn [coords]
+           (nvim/get-current-buffer-text-async
+             (fn [x]
+               (try
+                 (let [form (get-form-at x coords)]
+                   (write-output! (str form "\n"))
+                   (write-code! form))
+                 (catch Throwable t
+                   ;; TODO: Use more general plugin-level ereror handling
+                   (write-output!
+                     (str "\n##### PLUGIN ERR #####\n"
+                          (.getMessage t) "\n"
+                          (string/join "\n" (map str (.getStackTrace t)))
+                          \n"######################\n"))))))))))
 
    (nvim/register-method!
      "eval-buffer"
@@ -138,4 +173,3 @@
     ;; Let nvim know we're shutting down.
     (nvim/run-command! ":let g:is_running=0")
     (nvim/run-command! ":echo 'plugin stopping.'")))
-

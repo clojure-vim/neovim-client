@@ -29,7 +29,8 @@ command! EvalBuffer call EvalBuffer()
 
 function! EvalCode()
     "call StartIfNotRunning()
-    let res = rpcrequest(g:channel, 'eval-code', [])
+    "let res = rpcrequest(g:channel, 'eval-code', [])
+    let res = rpcrequest(1, 'eval-code', [])
     return res
 endfunction
 command! EvalCode call EvalCode()

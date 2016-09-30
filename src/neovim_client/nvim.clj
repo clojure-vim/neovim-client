@@ -22,13 +22,34 @@
 
 (defn get-api-info [] (send-message! "vim_get_api_info"))
 
+;; ***** Cursor *****
+
+(declare get-current-window-async)
+(defn get-cursor-location-async
+  "Gets the cursor's current position as a tuple (row, col) asynchronously."
+  [f]
+  (get-current-window-async
+    (fn [window]
+      (rpc/send-message-async!
+        (->request-msg "window_get_cursor" [window]) f))))
+
+;; ***** Lines *****
+
 (defn get-current-line [] (send-message! "vim_get_current_line"))
 
 (defn set-current-line!  [line] (send-message! "vim_set_current_line" line))
 
+;; ***** Windows *****
+
+(defn get-current-window-async
+  "Gets a reference to the current window asynchronously."
+  [f]
+  (rpc/send-message-async! (->request-msg "vim_get_current_window" []) f))
+
+;; ***** Buffers *****
+
 (defn get-current-buffer
-  ;; TODO: fix comment
-  "Returns ??? (object, map, ?) representing the current buffer."
+  "Returns a reference to the current buffer."
   []
   (send-message! "vim_get_current_buffer"))
 

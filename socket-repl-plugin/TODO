@@ -2,16 +2,21 @@ TODO
 	[X] Move all of the socket repl stuff to a plugin project
 	[X] Make buffer-get-text-async work, just test it at the repl
 	[X] Get "eval-code" working
-	[_] Figure out how to accumulate / display results in vim
+	[X] Figure out how to accumulate / display results in vim
 		[X] append it all to a file
 		[X] preferably a temp file (could be a lot of data)
-		[_] `:ShowRepl`
+		[X] `:ShowRepl`
 			no vimscript, invoke a plugin function
 			show the contents of the temp file in the current buffer
 			make it autoread
 	[X] Name vim functions correctly
+	[_] Rather than explicit repl output logging, can we intercept
+		channel
+		stream implementation
+	[_] tmux dev env script
 	[_] Pass host, port in connect
 	[_] Shut down the plugin if no input received for one minute
+	[X] evaluate form under cursor
 
 Goals
 	-Not a proper nRepl plugin, primary use is as an thought exercise
@@ -32,6 +37,8 @@ Goals
 		Forces you to explicity connect
 		One connection only `:call ConnectClojurePlugin(host, port)`
 		Accessible from vim buffer `:call ShowClojurePluginRepl()`
+	-Not a way of life
+		Does not include paredit, syntax highlight, etc
 
 Questions
 	Figwheel cljs-repl support
