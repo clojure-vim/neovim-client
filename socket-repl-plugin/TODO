@@ -1,4 +1,4 @@
-TODO
+TODO alpha
 	[X] Move all of the socket repl stuff to a plugin project
 	[X] Make buffer-get-text-async work, just test it at the repl
 	[X] Get "eval-code" working
@@ -10,11 +10,19 @@ TODO
 			show the contents of the temp file in the current buffer
 			make it autoread
 	[X] Name vim functions correctly
+	[_] create prod & debug plugin.vim
+		both should start the plugin the same way, w/ 
+		a bash script that specifies JVM options
+		eliminate lein
+		don't use a jar yet, just java -cp clojure.jar <clj-file> if possible
+	[_] add debug switch (var) to socket-repl-plugin.clj
+	[_] implement doc (word under cursor)
+	[_] Pass host, port in connect
+
+TODO final
 	[_] Rather than explicit repl output logging, can we intercept
 		channel
 		stream implementation
-	[_] tmux dev env script
-	[_] Pass host, port in connect
 	[_] Shut down the plugin if no input received for one minute
 	[X] evaluate form under cursor
 
@@ -43,9 +51,10 @@ Goals
 Questions
 	Figwheel cljs-repl support
 
-Usage
+Usage/Installation
+	if we ship jar, should be no install steps
 	add command line args to your project, so it starts socket repl
-	tell the plugin port (and host) to connect to
+	on :Connect specify port (and host) to connect to
 
 Debugging notes
 	vim
