@@ -8,7 +8,8 @@
     [neovim-client.nvim :as nvim])
   (:import
     (java.net Socket)
-    (java.io PrintStream File)))
+    (java.io PrintStream File))
+  (:gen-class))
 
 (def current-connection (atom nil))
 
@@ -70,6 +71,11 @@
   [string]
   (write-output @current-connection string))
 
+(defn update-last!
+  "Update the last accessed time."
+  []
+  (swap! current-connection assoc :last (System/currentTimeMillis)))
+
 (defn connect!
   "Connect to a socket repl. Adds the connection to the `current-connection`
   atom. Creates `go-loop`s to delegate input from the socket to `handler` one
@@ -85,7 +91,8 @@
                    :handler handler
                    :chan chan
                    :file file
-                   :file-stream (PrintStream. file)))
+                   :file-stream (PrintStream. file)
+                   :last (System/currentTimeMillis)))
 
     ;; input producer
     (go-loop []
@@ -100,14 +107,16 @@
                (recur))))
   "success")
 
-(defn -main
-  [& args]
-  ;; TODO: remove params for STDIO
-  (nvim/connect! "localhost" 7777)
+(defn start
+  [debug]
+  (if debug
+    (nvim/connect! "localhost" 7777)
+    (nvim/connect!))
 
   (nvim/register-method!
     "connect"
     (fn [msg]
+      (update-last!)
       ;; TODO: Get host/port from message
       (connect! "localhost" "5555"
                 (fn [x]
@@ -118,6 +127,7 @@
    (nvim/register-method!
      "eval-code"
      (fn [msg]
+       (update-last!)
        (nvim/get-cursor-location-async
          (fn [coords]
            (nvim/get-current-buffer-text-async
@@ -137,6 +147,7 @@
    (nvim/register-method!
      "eval-buffer"
      (fn [msg]
+       (update-last!)
        (nvim/get-current-buffer-text-async
          (fn [x]
            (write-output! (str x "\n"))
@@ -145,7 +156,7 @@
    (nvim/register-method!
      "show-log"
      (fn [msg]
-
+       (update-last!)
        (nvim/run-command-async!
          (format ":term tail -f %s" (-> @current-connection
                                         :file
@@ -162,14 +173,19 @@
              ":set updatetime=500 | au CursorHold <buffer> :e!"
              (fn [_] nil))))))
 
-  ;; TODO: Rather than an arbitrary timeout, the plugin should shut down
-  ;; when it has received no input for some time.
-  (comment
-    (dotimes [n 60]
-      (if (= 0 (mod n 10))
-        (nvim/run-command! (str ":echo 'plugin alive for " n " seconds.'")))
-      (Thread/sleep 1000))
+  ;; Don't need to do this in debug, socket repl will keep this alive.
+  (when-not debug
+    (loop []
+      (Thread/sleep 30000)
+      (let [elapsed-msec (- (System/currentTimeMillis)
+                            (:last @current-connection))]
+        (when (< elapsed-msec 60000)
+          (recur))))
 
     ;; Let nvim know we're shutting down.
     (nvim/run-command! ":let g:is_running=0")
     (nvim/run-command! ":echo 'plugin stopping.'")))
+
+(defn -main
+  [& args]
+  (start false))

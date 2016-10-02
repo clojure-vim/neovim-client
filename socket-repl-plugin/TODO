@@ -10,14 +10,12 @@ TODO alpha
 			show the contents of the temp file in the current buffer
 			make it autoread
 	[X] Name vim functions correctly
-	[_] create prod & debug plugin.vim
-		both should start the plugin the same way, w/ 
-		a bash script that specifies JVM options
-		eliminate lein
-		don't use a jar yet, just java -cp clojure.jar <clj-file> if possible
-	[_] add debug switch (var) to socket-repl-plugin.clj
+	[X] create prod & debug plugin.vim
+	[X] add debug switch (var) to socket-repl-plugin.clj
 	[_] implement doc (word under cursor)
 	[_] Pass host, port in connect
+	[_] Update README
+		Move NVIM_LISTEN... stuff to a debug section
 
 TODO final
 	[_] Rather than explicit repl output logging, can we intercept
@@ -47,21 +45,28 @@ Goals
 		Accessible from vim buffer `:call ShowClojurePluginRepl()`
 	-Not a way of life
 		Does not include paredit, syntax highlight, etc
+	-Architecture Diagram
+		nvim <--msgpack/stdio--> plugin (jar) <--localhost:5555--> socket repl
 
 Questions
 	Figwheel cljs-repl support
 
 Usage/Installation
-	if we ship jar, should be no install steps
+	no other install outside of normal plugin (pathogen, vundle, etc)
+		** except the rtp thing **
 	add command line args to your project, so it starts socket repl
-	on :Connect specify port (and host) to connect to
+		-Dclojure.server.repl="{:port 5555 :accept clojure.core.server/repl}"
+	on `:Connect` specify port (and host) to connect to
+	split a pane, `:ReplLog`
 
 Debugging notes
 	vim
-		rpcrequest(1, ...) <-- use channel 1, w/ tcp
-		don't do rpcstart
+		start vim w/ NVIM_LISTEN_ADDRESS
+		`:so` plugin/socket-repl.vim.debug script
 	clj
-		connect! add localhost 7777
-		vim blocks if you make a synchronous call to clj which makes a sync
-		call back to vim -- use async!
+		start plugin w/ `run.sh`
+			this also starts a socket repl on 5555
+		note: use async!
+		: vim blocks if you make a synchronous call to clj which makes a sync
+		: call back to vim -- use async!
 

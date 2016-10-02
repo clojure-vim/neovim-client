@@ -1,0 +1,28 @@
+let g:is_running = 0
+let g:channel = -1
+
+function! Connect()
+    let res = rpcrequest(1, 'connect', [])
+    return res
+endfunction
+command! Connect call Connect()
+
+function! EvalBuffer()
+    let res = rpcrequest(1, 'eval-buffer', [])
+    return res
+endfunction
+command! EvalBuffer call EvalBuffer()
+
+function! EvalCode()
+    let res = rpcrequest(1, 'eval-code', [])
+    return res
+endfunction
+command! EvalCode call EvalCode()
+
+function! ReplLog()
+    let res = rpcrequest(1, 'show-log', [])
+    return res
+endfunction
+command! ReplLog call ReplLog()
+
+echo 'debug socket repl plugin loaded!'
