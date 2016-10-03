@@ -10,15 +10,23 @@ TODO: architecture diagram
 
 ## Usage
 
-After starting a Clojure application with a socket repl server.
+Start a Clojure program with a socket repl server. This can be done by
+adding the following JVM options to any Clojure application.
+
+```
+-Dclojure.server.repl="{:port 5555 :accept clojure.core.server/repl}"
+```
+
+Then, from within Neovim, connect to the socket repl.
 
 ```
 :Connect <host> <port>
 ```
 
-Create a buffer for displaying interaction with the repl. In that buffer:
+Create a buffer for displaying interaction with the repl.
 
 ```
+:vnew
 :ReplLog
 ```
 
@@ -26,6 +34,11 @@ From there, to eval any buffer or form under cursor use:
 
 ```
 :EvalBuffer
+```
+
+or
+
+```
 :EvalCode
 ```
 
@@ -52,10 +65,17 @@ This plugin requires a version of the Java version 1.6 or higher. You've probabl
 
 ## Developing
 
-Start Neovim using:
+Start Neovim using, open the debug plugin script.
 
 ```
 NVIM_LISTEN_ADDRESS=127.0.0.1:7777 nvim plugin/socketrepl.vim.debug
+```
+
+From within Neovim, source the debug plugin script. This causes it to use
+a socket connection, rather than stdio to communicate with the plugin.
+
+```
+:so %
 ```
 
 Start the plugin. Then you'll need to connect to Neovim from the repl.
@@ -66,11 +86,18 @@ $> nc localhost 5555
 user=> (go)
 ```
 
-or, with Leiningen:
+or, with Leiningen
 
 ```
 $> lein repl
 $> (go)
 ```
 
-You can now use plugin commands from within Neovim `:Connect`, `:EvalBuffer`, etc.
+You can now use plugin commands from within Neovim `:Connect`, `:EvalBuffer`,
+etc.
+
+Note that you'll probably want to rely heavily on the asynchronous
+neovim-client functions when you want (the plugin) to make a request
+of neovim. This is because the Neovim function `rpcrequest` blocks until
+it has received a response (from your plugin). Using async on the plugin
+side is the easiest way to avoid deadlock.
