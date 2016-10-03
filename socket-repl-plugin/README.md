@@ -1,6 +1,6 @@
 # Neovim Socket Repl Plugin
 
-A [Neovim](https://github.com/neovim/neovim) plugin for Clojure which uses the build in [socket repl](http://clojure.org/reference/repl_and_main#_launching_a_socket_server) introduced in version 1.8 of Clojure.
+A [Neovim](https://github.com/neovim/neovim) plugin for Clojure which uses the built in [socket repl](http://clojure.org/reference/repl_and_main#_launching_a_socket_server) introduced in version 1.8 of Clojure.
 
 This plugin uses the [Neovim Clojure plugin host](https://github.com/jebberjeb/neovim-client). While intended to be a demonstration of the plugin host library, it may also be suitable for daily Clojure development.
 
