@@ -5,12 +5,11 @@ let g:channel = -1
 function! StartIfNotRunning()
     if g:is_running == 0
         echo 'starting plugin...'
-        "TODO - This is a dirty hack. We should launch things without changing
-        "the working directory.
         exec ':cd ' . s:p_dir
         exec ':cd ..'
         let g:channel = rpcstart('java', ['-jar', 'socket-repl-plugin-0.1.0-SNAPSHOT-standalone.jar'])
         let g:is_running = 1
+        call Connect()
     endif
 endfunction
 
