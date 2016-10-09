@@ -41,4 +41,17 @@ function! ReplLog()
 endfunction
 command! ReplLog call ReplLog()
 
-echo 'prod socket repl plugin loaded!'
+if !exists('g:disable_socket_repl_mappings')
+    nnoremap <leader>eb :EvalBuffer<cr>
+    nnoremap <leader>ef :EvalCode<cr>
+
+    function! ShowLog()
+        vnew
+        ReplLog
+        norm 
+        norm 
+    endfunction
+    nnoremap <leader>rlog :call ShowLog()<cr>
+endif
+
+echo 'socket repl plugin loaded!'
