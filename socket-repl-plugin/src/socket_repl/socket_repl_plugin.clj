@@ -158,9 +158,10 @@
      (fn [msg]
        (update-last!)
        (nvim/run-command-async!
-         (format ":term tail -f %s" (-> @current-connection
-                                        :file
-                                        .getAbsolutePath))
+         (format ":call termopen('tail -f %s') | stopinsert | exe \"normal \\<C-w>\\<C-x>\""
+                 (-> @current-connection
+                     :file
+                     .getAbsolutePath))
          (fn [_]))
 
        ;; Native solution, but only seems to work when the buffer has focus.
@@ -179,7 +180,7 @@
       (Thread/sleep 30000)
       (let [elapsed-msec (- (System/currentTimeMillis)
                             (:last @current-connection))]
-        (when (< elapsed-msec 60000)
+        (when (> elapsed-msec (* 10 60000))
           (recur))))
 
     ;; Let nvim know we're shutting down.

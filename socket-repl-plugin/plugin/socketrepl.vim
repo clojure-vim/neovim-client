@@ -47,9 +47,7 @@ if !exists('g:disable_socket_repl_mappings')
 
     function! ShowLog()
         vnew
-        ReplLog
-        norm 
-        norm 
+        call ReplLog()
     endfunction
     nnoremap <leader>rlog :call ShowLog()<cr>
 endif

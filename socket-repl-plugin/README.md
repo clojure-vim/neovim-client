@@ -44,6 +44,7 @@ are available to create your own mappings:
 :EvalForm
 :ReplLog
 ```
+
 Unlike the `<leader>rlog` mapping, the `:ReplLog` command simply adds the repl
 log to the current pane.
 
