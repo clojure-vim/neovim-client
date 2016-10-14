@@ -20,7 +20,22 @@
   [cmd-str f]
   (rpc/send-message-async! (->request-msg "vim_command" [cmd-str]) f))
 
+(defn get-var-async
+  [var-name f]
+  (rpc/send-message-async! (->request-msg "vim_get_var" [var-name]) f))
+
+(defn get-vvar-async
+  [var-name f]
+  (rpc/send-message-async! (->request-msg "vim_get_vvar" [var-name]) f))
+
+(defn call-function-async
+  [f-name args f]
+  (rpc/send-message-async! (->request-msg "vim_call_function" [f-name args]) f))
+
 (defn get-api-info [] (send-message! "vim_get_api_info"))
+
+(defn get-api-info-async [f]
+  (rpc/send-message-async! (->request-msg "vim_get_api_info" []) f))
 
 ;; ***** Cursor *****
 
@@ -127,6 +142,11 @@
 
 (defn hsplit! [] (run-command! "new"))
 (defn vsplit! [] (run-command! "vnew"))
+
+(defn get-current-word-async
+  "Get the current word asynchronously."
+  [f]
+  (call-function-async "expand" ["<cword>"] f))
 
 ;; TODO
 ;; the rest of the functions in (get_api_info)
