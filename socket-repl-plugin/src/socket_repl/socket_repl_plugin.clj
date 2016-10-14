@@ -120,9 +120,7 @@
       ;; TODO: Get host/port from message
       (connect! "localhost" "5555"
                 (fn [x]
-                  (nvim/run-command-async!
-                    (write-output! x)
-                    (fn [_] nil))))))
+                  (write-output! x)))))
 
    (nvim/register-method!
      "eval-code"
@@ -154,6 +152,11 @@
            (write-code! x)))))
 
    (nvim/register-method!
+     "doc"
+     (fn [msg]
+       ))
+
+   (nvim/register-method!
      "show-log"
      (fn [msg]
        (update-last!)
@@ -162,17 +165,7 @@
                  (-> @current-connection
                      :file
                      .getAbsolutePath))
-         (fn [_]))
-
-       ;; Native solution, but only seems to work when the buffer has focus.
-       #_(nvim/run-command-async!
-         (format ":e %s" (-> @current-connection
-                             :file
-                             .getAbsolutePath))
-         (fn [_]
-           (nvim/run-command-async!
-             ":set updatetime=500 | au CursorHold <buffer> :e!"
-             (fn [_] nil))))))
+         (fn [_]))))
 
   ;; Don't need to do this in debug, socket repl will keep this alive.
   (when-not debug
