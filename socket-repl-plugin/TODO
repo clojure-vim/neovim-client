@@ -12,7 +12,9 @@ TODO alpha
 	[X] Name vim functions correctly
 	[X] create prod & debug plugin.vim
 	[X] add debug switch (var) to socket-repl-plugin.clj
-	[_] implement doc (word under cursor)
+    [_] errors in the middle of a buffer
+    can be lost - wrap in eval?
+	[X] implement doc (word under cursor)
 	[_] Pass host, port in connect
 	[_] Update README
 		[X] Move NVIM_LISTEN... stuff to a debug section

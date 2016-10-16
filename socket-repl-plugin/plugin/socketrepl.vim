@@ -41,9 +41,16 @@ function! ReplLog()
 endfunction
 command! ReplLog call ReplLog()
 
+function! Doc()
+    let res = rpcrequest(1, 'doc', [])
+    return res
+endfunction
+command! Doc call Doc()
+
 if !exists('g:disable_socket_repl_mappings')
     nnoremap <leader>eb :EvalBuffer<cr>
     nnoremap <leader>ef :EvalCode<cr>
+    nnoremap <leader>doc :Doc<cr>
 
     function! ShowLog()
         vnew

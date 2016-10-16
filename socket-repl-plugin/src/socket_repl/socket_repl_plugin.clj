@@ -154,7 +154,11 @@
    (nvim/register-method!
      "doc"
      (fn [msg]
-       ))
+       (nvim/get-current-word-async
+         (fn [word]
+           (let [code (format "(clojure.repl/doc  %s)" word)]
+             (write-output! (str code "\n"))
+             (write-code! code))))))
 
    (nvim/register-method!
      "show-log"
@@ -173,7 +177,7 @@
       (Thread/sleep 30000)
       (let [elapsed-msec (- (System/currentTimeMillis)
                             (:last @current-connection))]
-        (when (> elapsed-msec (* 10 60000))
+        (when (< elapsed-msec (* 10 60000))
           (recur))))
 
     ;; Let nvim know we're shutting down.
