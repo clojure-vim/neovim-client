@@ -75,8 +75,7 @@ However, it goes on to outline a better approach, utilizing a "plugin host". Whi
 
 ### Performance
 
-Individual plugins can be distributed as jars using AOT compilation, as is the
-case for the socket repl plugin. Additionally, porting this client library to Clojurescript would facilitate a fast startup time, via Node.
+Individual plugins can be distributed as jars using AOT compilation. Additionally, porting this client library to Clojurescript would facilitate a fast startup time, via Node.
 
 ## License
 
