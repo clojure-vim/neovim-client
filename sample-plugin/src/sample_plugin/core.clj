@@ -12,7 +12,7 @@
       (fn [msg]
         ;; Plugin can call back to nvim if it wants to, while
         ;; its doing its own thing.
-        (nvim/run-command-async! ":echo 'incrementing'"
+        (nvim/vim-command-async ":echo 'incrementing'"
                                  (fn [_] nil))
         (swap! x inc)
         @x)))
@@ -20,9 +20,9 @@
   ;; Stay alive for a minute!
   (dotimes [n 60]
     (if (= 0 (mod n 10))
-      (nvim/run-command! (str ":echo 'plugin alive for " n " seconds.'")))
+      (nvim/vim-command (str ":echo 'plugin alive for " n " seconds.'")))
     (Thread/sleep 1000))
 
   ;; Let nvim know we're shutting down.
-  (nvim/run-command! ":let g:is_running=0")
-  (nvim/run-command! ":echo 'plugin stopping.'"))
+  (nvim/vim-command ":let g:is_running=0")
+  (nvim/vim-command ":echo 'plugin stopping.'"))
