@@ -29,6 +29,7 @@
 (defvim buffer-get-line "buffer_get_line" buffer line-num)
 (defvim buffer-line-count "buffer_line_count" buffer)
 (defvim buffer-get-name "buffer_get_name" buffer)
+(defvim buffer-get-var "buffer_get_var" buffer var-name)
 (defvim buffer-set-line "buffer_set_line" buffer line-num line)
 (defvim vim-call-function "vim_call_function" f-name args)
 (defvim vim-command "vim_command" cmd-str)

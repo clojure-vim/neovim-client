@@ -51,5 +51,5 @@
 
 (defn params
   [msg]
-  {:pre [(request? msg)]}
+  {:pre [(or (request? msg) (response? msg))]}
   (last msg))
