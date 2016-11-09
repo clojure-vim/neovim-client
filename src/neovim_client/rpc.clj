@@ -21,14 +21,13 @@
 (defn create-input-channel
   "Read messages from the input stream, put them on a channel."
   [input-stream]
-  (let [chan (async/chan)
+  (let [chan (async/chan 1024)
         input-stream (DataInputStream. input-stream)]
-    (async/go
-      (while true
-        (log/info "waiting for input stream")
-        (let [msg (msgpack/unpack-stream input-stream)]
-          (log/info "stream -> msg -> in chan: " msg)
-          (async/>! chan msg))))
+    (async/go-loop []
+      (let [msg (msgpack/unpack-stream input-stream)]
+        (log/info "stream -> msg -> in chan: " msg)
+        (async/>! chan msg))
+      (recur))
     chan))
 
 (defn write-msg!
@@ -40,13 +39,13 @@
 (defn create-output-channel
   "Make a channel to read messages from, write to output stream."
   [output-stream]
-  (let [chan (async/chan)
+  (let [chan (async/chan 1024)
         output-stream (DataOutputStream. output-stream)]
-    (async/go
-      (while true
-        (let [msg (async/<! chan)]
-          (log/info "stream <- msg <- out chan: " msg)
-          (write-msg! (msgpack/pack msg) output-stream))))
+    (async/go-loop []
+      (let [msg (async/<! chan)]
+        (log/info "stream <- msg <- out chan: " msg)
+        (write-msg! (msgpack/pack msg) output-stream))
+      (recur))
     chan))
 
 (declare send-message-async!)
@@ -57,21 +56,21 @@
   (reset! out-chan (create-output-channel output-stream))
 
   ;; Handle stuff on the input channel -- where should this live?
-  (async/go
-    (while true
-      ;; TODO - let the in-chan, if we leave this code here.
-      (let [msg (async/<! @in-chan)]
-        (condp = (msg-type msg)
+  (async/go-loop []
+    ;; TODO - let the in-chan, if we leave this code here.
+    (let [msg (async/<! @in-chan)]
+      (condp = (msg-type msg)
 
-          msg/+response+
-          (let [f (:fn (get @msg-table (id msg)))]
-            (swap! msg-table dissoc (id msg))
-            (f (value msg)))
+        msg/+response+
+        (let [f (:fn (get @msg-table (id msg)))]
+          (swap! msg-table dissoc (id msg))
+          (f (value msg)))
 
-          msg/+request+
-          (let [f (get @method-table (method msg) method-not-found)
-                result (f msg)]
-            (send-message-async! (->response-msg (id msg) result) nil)))))))
+        msg/+request+
+        (let [f (get @method-table (method msg) method-not-found)
+              result (f msg)]
+          (send-message-async! (->response-msg (id msg) result) nil))))
+    (recur)))
 
 ;; ***** Public *****
 
