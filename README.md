@@ -63,7 +63,10 @@ rpcrequest().
 
 #### Socket Repl Plugin
 
-TODO
+A simple alternative to vim-fireplace. Send code in vim buffers to a built-in
+Clojure socket repl.
+
+https://github.com/jebberjeb/clojure-socketrepl.nvim
 
 ## Future
 
