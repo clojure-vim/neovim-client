@@ -59,6 +59,11 @@
 
 ;; TODO - fix custom names, move to another ns?
 
+(defn get-cursor-location
+  "Gets the cursor's current position as a tuple (row, col)."
+  []
+  (window-get-cursor (vim-get-current-window)))
+
 (defn get-cursor-location-async
   "Gets the cursor's current position as a tuple (row, col) asynchronously."
   [f]
@@ -71,6 +76,11 @@
     (buffer-get-line-async buffer n #(buffer-set-line-async buffer n
                                                             (update-fn %)
                                                             identity))))
+(defn get-current-buffer-text
+  "Convenience function to get the current buffer's text."
+  []
+  (str/join "\n" (buffer-get-line-slice (vim-get-current-buffer) 0 -1)))
+
 (defn get-current-buffer-text-async
   "Convenience function to get the current buffer's text asynchronously."
   [f]
