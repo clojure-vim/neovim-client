@@ -6,9 +6,11 @@
   :dependencies [[org.clojure/clojure "1.9.0-alpha12"]
                  [org.clojure/core.async "0.2.391"]
                  [org.clojure/tools.logging "0.3.1"]
+                 [log4j/log4j "1.2.17" :exclusions [javax.mail/mail
+                                                 javax.jms/jms
+                                                 com.sun.jmdk/jmxtools
+                                                 com.sun.jmx/jmxri]]
                  [clj-logging-config "1.9.12"]
                  [clojure-msgpack "1.0.0"]]
   :repl-options {:init-ns neovim-client.nvim}
-  :main ^:skip-aot neovim-client.socket-repl-plugin
-  :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}})
+  :target-path "target/%s")
