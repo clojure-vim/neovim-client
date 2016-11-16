@@ -79,6 +79,7 @@
   ([] (connect* System/in System/out))
   ([host port]
    (let [socket (java.net.Socket. host port)]
+     (.setTcpNoDelay socket true)
      (connect* (.getInputStream socket) (.getOutputStream socket)))))
 
 (defn send-message-async!
