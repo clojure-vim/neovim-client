@@ -41,7 +41,9 @@
 (defvim vim-get-var "vim_get_var" var-name)
 (defvim vim-get-vvar "vim_get_vvar" var-name)
 (defvim vim-get-windows "vim_get_windows")
+(defvim vim-set-current-buffer "vim_set_current_buffer" buffer)
 (defvim vim-set-current-line "vim_set_current_line" line)
+(defvim vim-set-current-window "vim_set_current_window" window)
 (defvim window-get-buffer "window_get_buffer" window)
 (defvim window-get-cursor "window_get_cursor" window)
 
