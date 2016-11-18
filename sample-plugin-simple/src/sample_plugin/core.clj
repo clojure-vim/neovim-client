@@ -4,7 +4,7 @@
 
 (defn -main
   [& args]
-  (nvim/connect!)
-  (nvim/vim-command ":new")
-  (let [cur-buf (nvim/vim-get-current-buffer)]
-    (nvim/buffer-set-text! cur-buf "Sample plugin was here!")))
+  (let [nvim (nvim/new)
+        cur-buf (nvim/vim-get-current-buffer nvim)]
+    (nvim/vim-command nvim ":new")
+    (nvim/buffer-set-text! nvim cur-buf "Sample plugin was here!")))

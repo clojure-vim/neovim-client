@@ -8,92 +8,105 @@
   (:import [java.io DataInputStream DataOutputStream]
            [java.net Socket]))
 
-(def out-chan (atom nil))
-(def in-chan (atom nil))
-(def msg-table (atom {}))
-(def method-table (atom {}))
-
-(defn method-not-found
+(defn- method-not-found
   [msg]
   (log/error "method not found for msg " msg)
   (str "method not found - " (method msg)))
 
-(defn create-input-channel
+(defn- create-input-channel
   "Read messages from the input stream, put them on a channel."
   [input-stream]
   (let [chan (async/chan 1024)
         input-stream (DataInputStream. input-stream)]
-    (async/go-loop []
-      (let [msg (msgpack/unpack-stream input-stream)]
+    (async/go-loop
+      []
+      (when-let [msg (msgpack/unpack-stream input-stream)]
         (log/info "stream -> msg -> in chan: " msg)
-        (async/>! chan msg))
-      (recur))
-    chan))
+        (async/>! chan msg)
+        (recur)))
+    [chan input-stream]))
 
-(defn write-msg!
+(defn- write-msg!
   [packed-msg out-stream]
   (doseq [b packed-msg]
     (.writeByte out-stream b))
   (.flush out-stream))
 
-(defn create-output-channel
+(defn- create-output-channel
   "Make a channel to read messages from, write to output stream."
   [output-stream]
   (let [chan (async/chan 1024)
         output-stream (DataOutputStream. output-stream)]
-    (async/go-loop []
-      (let [msg (async/<! chan)]
+    (async/go-loop
+      []
+      (when-let [msg (async/<! chan)]
         (log/info "stream <- msg <- out chan: " msg)
-        (write-msg! (msgpack/pack msg) output-stream))
-      (recur))
+        (write-msg! (msgpack/pack msg) output-stream)
+        (recur)))
     chan))
-
-(declare send-message-async!)
-
-(defn connect*
-  [input-stream output-stream]
-  (reset! in-chan (create-input-channel input-stream))
-  (reset! out-chan (create-output-channel output-stream))
-
-  ;; Handle stuff on the input channel -- where should this live?
-  (async/go-loop []
-    ;; TODO - let the in-chan, if we leave this code here.
-    (let [msg (async/<! @in-chan)]
-      (condp = (msg-type msg)
-
-        msg/+response+
-        (let [f (:fn (get @msg-table (id msg)))]
-          (swap! msg-table dissoc (id msg))
-          (f (value msg)))
-
-        msg/+request+
-        (let [f (get @method-table (method msg) method-not-found)
-              result (f msg)]
-          (send-message-async! (->response-msg (id msg) result) nil))))
-    (recur)))
 
 ;; ***** Public *****
 
-(defn connect!
-  "Connect to msgpack-rpc channel via standard io or TCP socket."
-  ([] (connect* System/in System/out))
-  ([host port]
-   (let [socket (java.net.Socket. host port)]
-     (.setTcpNoDelay socket true)
-     (connect* (.getInputStream socket) (.getOutputStream socket)))))
-
 (defn send-message-async!
-  [msg callback-fn]
+  [{:keys [message-table out-chan]} msg callback-fn]
   (if (= msg/+request+ (msg-type msg))
-    (swap! msg-table assoc (id msg) {:msg msg :fn callback-fn}))
-  (async/put! @out-chan msg))
+    (swap! message-table assoc (id msg) {:msg msg :fn callback-fn}))
+  (async/put! out-chan msg))
 
 (defn send-message!
-  [msg]
+  [component msg]
   (let [p (promise)]
-    (send-message-async! msg (partial deliver p))
+    (send-message-async! component msg (partial deliver p))
     @p))
 
 (defn register-method!
-  [method f]
+  [{:keys [method-table]} method f]
   (swap! method-table assoc method f))
+
+(defn stop
+  "Stop the connection. Right now, this probably only works for debug, when
+  connected to socket. Don't think we should be trying to .close STDIO streams."
+  [{:keys [input-stream output-stream out-chan in-chan data-stream]}]
+  (async/close! out-chan)
+  (async/close! in-chan)
+  (.close data-stream)
+  (.close input-stream)
+  (.close output-stream))
+
+(defn new*
+  [input-stream output-stream]
+  (let [[in-chan data-stream] (create-input-channel input-stream)
+        message-table (atom {})
+        method-table (atom {})
+        component {:input-stream input-stream
+                   :data-stream data-stream
+                   :output-stream output-stream
+                   :out-chan (create-output-channel output-stream) 
+                   :in-chan in-chan
+                   :message-table message-table
+                   :method-table method-table}]
+    (async/go-loop
+      []
+      (when-let [msg (async/<! in-chan)]
+        (condp = (msg-type msg)
+
+          msg/+response+
+          (let [f (:fn (get @message-table (id msg)))]
+            (swap! message-table dissoc (id msg))
+            (f (value msg)))
+
+          msg/+request+
+          (let [f (get @method-table (method msg) method-not-found)
+                result (f msg)]
+            (send-message-async!
+              component (->response-msg (id msg) result) nil)))
+        (recur)))
+    component))
+
+(defn new
+  "Connect to msgpack-rpc channel via standard io or TCP socket."
+  ([] (new* System/in System/out))
+  ([host port]
+   (let [socket (java.net.Socket. host port)]
+     (.setTcpNoDelay socket true)
+     (new* (.getInputStream socket) (.getOutputStream socket)))))

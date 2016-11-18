@@ -10,4 +10,4 @@ tmux send-keys "NVIM_LISTEN_ADDRESS=127.0.0.1:7777 nvim" C-m
 tmux split
 tmux send-keys 'rlwrap java -cp "$(cat .classpath)" clojure.main' C-m
 tmux send-keys '(println "Plugin repl connecting to nvim")' C-m
-tmux send-keys '(go)' C-m
+tmux send-keys '(def c (connection))' C-m

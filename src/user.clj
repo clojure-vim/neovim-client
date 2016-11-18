@@ -3,7 +3,7 @@
     [neovim-client.nvim :as nvim]
     [clojure.tools.namespace.repl :refer [refresh]]))
 
-(defn go
-  "Start the plugin."
+(defn connection
+  "Get an nvim connection."
   []
-  (nvim/connect! "localhost" 7777))
+  (nvim/new "localhost" 7777))

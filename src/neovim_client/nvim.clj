@@ -6,22 +6,23 @@
 
 ;; ***** Public *****
 
-(def connect! rpc/connect!)
+(def new rpc/new)
 (def register-method! rpc/register-method!)
-
-;; TODO - Check for connection, before allowing commands?
+(def stop rpc/stop)
 
 (defmacro defvim
   [fn-name vim-command & args]
   `(do
      (defn ~(symbol (str fn-name "-async"))
-       [~@args f#]
+       [nvim# ~@args f#]
        (rpc/send-message-async!
+         nvim#
          (message/->request-msg ~vim-command [~@args])
          f#))
      (defn ~fn-name
-       [~@args]
+       [nvim# ~@args]
        (rpc/send-message!
+         nvim#
          (message/->request-msg ~vim-command [~@args])))))
 
 ;; :let g:foo=1
@@ -52,11 +53,11 @@
 ;; TODO give x, y correct names
 (defvim buffer-get-line-slice* "buffer_get_line_slice" buffer start end x y)
 (defn buffer-get-line-slice
-  [buffer start end]
-  (buffer-get-line-slice* buffer start end true true))
+  [nvim buffer start end]
+  (buffer-get-line-slice* nvim buffer start end true true))
 (defn buffer-get-line-slice-async
-  [buffer start end f]
-  (buffer-get-line-slice*-async buffer start end true true f))
+  [nvim buffer start end f]
+  (buffer-get-line-slice*-async nvim buffer start end true true f))
 
 ;; ***** Custom *****
 
@@ -64,50 +65,54 @@
 
 (defn get-cursor-location
   "Gets the cursor's current position as a tuple (row, col)."
-  []
-  (window-get-cursor (vim-get-current-window)))
+  [nvim]
+  (window-get-cursor nvim (vim-get-current-window nvim)))
 
 (defn get-cursor-location-async
   "Gets the cursor's current position as a tuple (row, col) asynchronously."
-  [f]
-  (vim-get-current-window-async #(window-get-cursor-async % f)))
+  [nvim f]
+  (vim-get-current-window-async nvim #(window-get-cursor-async nvim % f)))
 
 (defn buffer-update-lines!
   "Alter each line of the buffer using the function."
-  [buffer update-fn]
-  (doseq [n (range (buffer-line-count buffer))]
-    (buffer-get-line-async buffer n #(buffer-set-line-async buffer n
-                                                            (update-fn %)
-                                                            identity))))
+  [nvim buffer update-fn]
+  (doseq [n (range (buffer-line-count nvim buffer))]
+    (buffer-get-line-async nvim buffer n #(buffer-set-line-async nvim
+                                                                 buffer n
+                                                                 (update-fn %)
+                                                                 identity))))
 (defn get-current-buffer-text
   "Convenience function to get the current buffer's text."
-  []
-  (str/join "\n" (buffer-get-line-slice (vim-get-current-buffer) 0 -1)))
+  [nvim]
+  (str/join "\n" (buffer-get-line-slice nvim (vim-get-current-buffer nvim)
+                                        0 -1)))
 
 (defn get-current-buffer-text-async
   "Convenience function to get the current buffer's text asynchronously."
-  [f]
+  [nvim f]
   (vim-get-current-buffer-async
+    nvim
     (fn [buffer] (buffer-get-line-slice-async
-                   buffer 0 -1 (fn [lines] (f (str/join "\n" lines)))))))
+                   nvim buffer 0 -1 (fn [lines] (f (str/join "\n" lines)))))))
 
 (defn buffer-set-text!
   "Replace the contents of the buffer with `text`."
-  [buffer text]
+  [nvim buffer text]
   (let [lines (str/split text #"\n")]
     (doseq [n (range (count lines))]
-      (buffer-set-line buffer n (nth lines n)))))
+      (buffer-set-line nvim buffer n (nth lines n)))))
 
 (defn get-current-word-async
   "Get the current word asynchronously."
-  [f]
-  (vim-call-function-async "expand" ["<cword>"] f))
+  [nvim f]
+  (vim-call-function-async nvim "expand" ["<cword>"] f))
 
 (defn buffer-visible?-async
   "Returns a channel which will contain true if the buffer is currently
   visible."
-  [buffer-name]
+  [nvim buffer-name]
   (async/go
-    (let [visible-buffers (map (comp buffer-get-name window-get-buffer)
-                               (vim-get-windows))]
+    (let [visible-buffers (map (comp #(buffer-get-name nvim %)
+                                     #(window-get-buffer nvim %))
+                               (vim-get-windows nvim))]
       ((set visible-buffers) buffer-name))))
