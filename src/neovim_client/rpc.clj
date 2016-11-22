@@ -85,9 +85,9 @@
                    :in-chan in-chan
                    :message-table message-table
                    :method-table method-table}]
-    (async/go-loop
+    (future (loop
       []
-      (when-let [msg (async/<! in-chan)]
+      (when-let [msg (async/<!! in-chan)]
         (condp = (msg-type msg)
 
           msg/+response+
@@ -100,7 +100,7 @@
                 result (f msg)]
             (send-message-async!
               component (->response-msg (id msg) result) nil)))
-        (recur)))
+        (recur))))
     component))
 
 (defn new
