@@ -12,6 +12,6 @@
                                                  com.sun.jmdk/jmxtools
                                                  com.sun.jmx/jmxri]]
                  [clj-logging-config "1.9.12"]
-                 [clojure-msgpack "1.0.0"]]
+                 [clojure-msgpack "1.2.0"]]
   :repl-options {:init-ns neovim-client.nvim}
   :target-path "target/%s")

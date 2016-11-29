@@ -1,6 +1,7 @@
 (ns neovim-client.rpc
   (:require [clojure.core.async :as async]
             [clojure.tools.logging :as log]
+            [msgpack.clojure-extensions]
             [msgpack.core :as msgpack]
             [neovim-client.message :refer [id value msg-type method params
                                            ->response-msg]
@@ -16,15 +17,14 @@
 (defn- create-input-channel
   "Read messages from the input stream, put them on a channel."
   [input-stream]
-  (let [chan (async/chan 1024)
-        input-stream (DataInputStream. input-stream)]
+  (let [chan (async/chan 1024)]
     (async/go-loop
       []
-      (when-let [msg (msgpack/unpack-stream input-stream)]
+      (when-let [msg (msgpack/unpack (DataInputStream. input-stream))]
         (log/info "stream -> msg -> in chan: " msg)
         (async/>! chan msg)
         (recur)))
-    [chan input-stream]))
+    chan))
 
 (defn- write-msg!
   [packed-msg out-stream]
@@ -35,13 +35,12 @@
 (defn- create-output-channel
   "Make a channel to read messages from, write to output stream."
   [output-stream]
-  (let [chan (async/chan 1024)
-        output-stream (DataOutputStream. output-stream)]
+  (let [chan (async/chan 1024)]
     (async/go-loop
       []
       (when-let [msg (async/<! chan)]
         (log/info "stream <- msg <- out chan: " msg)
-        (write-msg! (msgpack/pack msg) output-stream)
+        (write-msg! (msgpack/pack msg) (DataOutputStream. output-stream))
         (recur)))
     chan))
 
@@ -66,20 +65,18 @@
 (defn stop
   "Stop the connection. Right now, this probably only works for debug, when
   connected to socket. Don't think we should be trying to .close STDIO streams."
-  [{:keys [input-stream output-stream out-chan in-chan data-stream]}]
+  [{:keys [input-stream output-stream out-chan in-chan]}]
   (async/close! out-chan)
   (async/close! in-chan)
-  (.close data-stream)
   (.close input-stream)
   (.close output-stream))
 
 (defn new*
   [input-stream output-stream]
-  (let [[in-chan data-stream] (create-input-channel input-stream)
+  (let [in-chan (create-input-channel input-stream)
         message-table (atom {})
         method-table (atom {})
         component {:input-stream input-stream
-                   :data-stream data-stream
                    :output-stream output-stream
                    :out-chan (create-output-channel output-stream) 
                    :in-chan in-chan
