@@ -6,8 +6,7 @@
             [neovim-client.message :refer [id value msg-type method params
                                            ->response-msg]
                                    :as msg])
-  (:import [java.io DataInputStream DataOutputStream]
-           [java.net Socket]))
+  (:import (java.io DataInputStream DataOutputStream)))
 
 (defn- method-not-found
   [msg]
@@ -20,7 +19,7 @@
   (let [chan (async/chan 1024)]
     (async/go-loop
       []
-      (when-let [msg (msgpack/unpack (DataInputStream. input-stream))]
+      (when-let [msg (msgpack/unpack input-stream)]
         (log/info "stream -> msg -> in chan: " msg)
         (async/>! chan msg)
         (recur)))
@@ -40,7 +39,7 @@
       []
       (when-let [msg (async/<! chan)]
         (log/info "stream <- msg <- out chan: " msg)
-        (write-msg! (msgpack/pack msg) (DataOutputStream. output-stream))
+        (write-msg! (msgpack/pack msg) output-stream)
         (recur)))
     chan))
 
@@ -68,12 +67,18 @@
   [{:keys [input-stream output-stream out-chan in-chan]}]
   (async/close! out-chan)
   (async/close! in-chan)
+  ;; TODO - drain the out-chan before closing the output-stream.
+  (log/info "closing output stream")
+  (.close output-stream)
+  (log/info "closing input stream")
   (.close input-stream)
-  (.close output-stream))
+  (log/info "input and output streams closed"))
 
-(defn new*
+(defn new
   [input-stream output-stream]
   (let [in-chan (create-input-channel input-stream)
+        input-stream (DataInputStream. input-stream)
+        output-stream (DataOutputStream. output-stream)
         message-table (atom {})
         method-table (atom {})
         component {:input-stream input-stream
@@ -99,11 +104,3 @@
               component (->response-msg (id msg) result) nil)))
         (recur))))
     component))
-
-(defn new
-  "Connect to msgpack-rpc channel via standard io or TCP socket."
-  ([] (new* System/in System/out))
-  ([host port]
-   (let [socket (java.net.Socket. host port)]
-     (.setTcpNoDelay socket true)
-     (new* (.getInputStream socket) (.getOutputStream socket)))))

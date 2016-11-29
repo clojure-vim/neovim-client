@@ -1,14 +1,10 @@
 (ns neovim-client.nvim
   (:require [clojure.core.async :as async]
             [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [neovim-client.message :as message :refer [->request-msg]]
-            [neovim-client.rpc :as rpc]))
-
-;; ***** Public *****
-
-(def new rpc/new)
-(def register-method! rpc/register-method!)
-(def stop rpc/stop)
+            [neovim-client.rpc :as rpc])
+  (:import (java.net Socket)))
 
 (defmacro defvim
   [fn-name vim-command & args]
@@ -116,3 +112,26 @@
                                      #(window-get-buffer nvim %))
                                (vim-get-windows nvim))]
       ((set visible-buffers) buffer-name))))
+
+(def register-method! rpc/register-method!)
+(def stop rpc/stop)
+
+(defn new*
+  [input output debug]
+  (let [component (rpc/new input output)]
+    ;; Each time you connect to the same nvim instance using a tcp socket, nvim
+    ;; allocates a new channel.
+    (when debug
+      (let [api-info (vim-get-api-info component)]
+        (vim-command component (format "let g:nvim_tcp_plugin_channel = %s"
+                                       (first api-info)))))
+    component))
+
+(defn new
+  "Connect to msgpack-rpc channel via standard io or TCP socket."
+  ([] (new* System/in System/out) false)
+  ([host port]
+   (log/info "plugin host connecting to nvim at " host ":" port)
+   (let [socket (java.net.Socket. host port)]
+     (.setTcpNoDelay socket true)
+     (new* (.getInputStream socket) (.getOutputStream socket) true))))
