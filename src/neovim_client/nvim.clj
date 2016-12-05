@@ -129,7 +129,7 @@
 
 (defn new
   "Connect to msgpack-rpc channel via standard io or TCP socket."
-  ([] (new* System/in System/out) false)
+  ([] (new* System/in System/out false))
   ([host port]
    (log/info "plugin host connecting to nvim at " host ":" port)
    (let [socket (java.net.Socket. host port)]
