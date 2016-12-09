@@ -17,14 +17,12 @@
   "Read messages from the input stream, put them on a channel."
   [input-stream]
   (let [chan (async/chan 1024)]
-    ;; TODO make these threads w/ loops, since they're handling IO
-    ;; might explain the wierd drlog blockages
-    (async/go-loop
-      []
-      (when-let [msg (msgpack/unpack input-stream)]
-        (log/info "stream -> msg -> in chan: " msg)
-        (async/>! chan msg)
-        (recur)))
+    (async/thread
+      (loop []
+        (when-let [msg (msgpack/unpack input-stream)]
+          (log/info "stream -> msg -> in chan: " msg)
+          (async/>!! chan msg)
+          (recur))))
     chan))
 
 (defn- write-msg!
@@ -37,12 +35,12 @@
   "Make a channel to read messages from, write to output stream."
   [output-stream]
   (let [chan (async/chan 1024)]
-    (async/go-loop
-      []
-      (when-let [msg (async/<! chan)]
-        (log/info "stream <- msg <- out chan: " msg)
-        (write-msg! (msgpack/pack msg) output-stream)
-        (recur)))
+    (async/thread
+      (loop []
+        (when-let [msg (async/<!! chan)]
+          (log/info "stream <- msg <- out chan: " msg)
+          (write-msg! (msgpack/pack msg) output-stream)
+          (recur))))
     chan))
 
 ;; ***** Public *****
