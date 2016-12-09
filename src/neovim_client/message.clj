@@ -2,6 +2,7 @@
 
 (def +request+ 0)
 (def +response+ 1)
+(def +notify+ 2)
 
 (defn gen-msg-id
   "Get a unique message id."
@@ -18,7 +19,6 @@
   [id result]
   [1 id nil result])
 
-
 ;; TODO - find better way to get [B type.
 (def byte-array-type (type (.getBytes "foo")))
 
@@ -34,10 +34,13 @@
 
 ;; ***** Accessor fns *****
 (def msg-type first)
+
+;; Only true for request & response, notify has no id
 (def id second)
 
 (defn request? [msg] (= +request+ (msg-type msg)))
 (defn response? [msg] (= +response+ (msg-type msg)))
+(defn notify? [msg] (= +notify+ (msg-type msg)))
 
 (defn value
   [msg]
@@ -46,10 +49,10 @@
 
 (defn method
   [msg]
-  {:pre [(request? msg)]}
-  (bytes->str (nth msg 2)))
+  {:pre [(or (request? msg) (notify? msg))]}
+  (bytes->str (nth (reverse msg) 1)))
 
 (defn params
   [msg]
-  {:pre [(or (request? msg) (response? msg))]}
+  {:pre [(or (request? msg) (response? msg) (notify? msg))]}
   (last msg))

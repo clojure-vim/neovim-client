@@ -17,6 +17,8 @@
   "Read messages from the input stream, put them on a channel."
   [input-stream]
   (let [chan (async/chan 1024)]
+    ;; TODO make these threads w/ loops, since they're handling IO
+    ;; might explain the wierd drlog blockages
     (async/go-loop
       []
       (when-let [msg (msgpack/unpack input-stream)]
@@ -101,6 +103,11 @@
           (let [f (get @method-table (method msg) method-not-found)
                 result (f msg)]
             (send-message-async!
-              component (->response-msg (id msg) result) nil)))
+              component (->response-msg (id msg) result) nil))
+
+          msg/+notify+
+          (let [f (get @method-table (method msg) method-not-found)
+                result (f msg)]))
+
         (recur))))
     component))
