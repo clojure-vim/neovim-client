@@ -19,17 +19,13 @@
   (let [chan (async/chan 1024)]
     (async/thread
       (loop []
+        (log/info "stream[m] --- in-chan[ ] --- plugin")
         (when-let [msg (msgpack/unpack input-stream)]
-          (log/info "stream -> msg -> in chan: " msg)
+          (log/info "stream[ ] ->m in-chan[ ] --- plugin" msg)
           (async/>!! chan msg)
+          (log/info "stream[ ] --- in-chan[m] --- plugin" (id msg))
           (recur))))
     chan))
-
-(defn- write-msg!
-  [packed-msg out-stream]
-  (doseq [b packed-msg]
-    (.writeByte out-stream b))
-  (.flush out-stream))
 
 (defn- create-output-channel
   "Make a channel to read messages from, write to output stream."
@@ -37,9 +33,13 @@
   (let [chan (async/chan 1024)]
     (async/thread
       (loop []
+        (log/info "stream[ ] --- out-chan[m] --- plugin")
         (when-let [msg (async/<!! chan)]
-          (log/info "stream <- msg <- out chan: " msg)
-          (write-msg! (msgpack/pack msg) output-stream)
+          (log/info "stream[ ] m<- out-chan[ ] --- plugin" (id msg))
+          (let [packed (msgpack/pack msg)]
+            (.write output-stream packed 0 (count packed)))
+          (.flush output-stream)
+          (log/info "stream[m] --- out-chan[ ] --- plugin" (id msg))
           (recur))))
     chan))
 
@@ -47,9 +47,11 @@
 
 (defn send-message-async!
   [{:keys [message-table out-chan]} msg callback-fn]
-  (if (= msg/+request+ (msg-type msg))
+  (when (= msg/+request+ (msg-type msg))
     (swap! message-table assoc (id msg) {:msg msg :fn callback-fn}))
-  (async/put! out-chan msg))
+  (log/info "stream[ ] --- out-chan[ ] m<- plugin" msg)
+  (async/>!! out-chan msg)
+  (log/info "stream[ ] --- out-chan[m] --- plugin" (id msg)))
 
 (defn send-message!
   [component msg]
@@ -78,7 +80,6 @@
   [input-stream output-stream]
   (let [in-chan (create-input-channel input-stream)
         input-stream (DataInputStream. input-stream)
-        output-stream (DataOutputStream. output-stream)
         message-table (atom {})
         method-table (atom {})
         component {:input-stream input-stream
@@ -87,25 +88,35 @@
                    :in-chan in-chan
                    :message-table message-table
                    :method-table method-table}]
-    (future (loop
-      []
-      (when-let [msg (async/<!! in-chan)]
-        (condp = (msg-type msg)
 
-          msg/+response+
-          (let [f (:fn (get @message-table (id msg)))]
-            (swap! message-table dissoc (id msg))
-            (f (value msg)))
+    (future
+      (try
+        (loop []
+          (when-let [msg (async/<!! in-chan)]
+            (log/info "stream[ ] --- in-chan[ ] ->m plugin" (id msg))
+            (condp = (msg-type msg)
 
-          msg/+request+
-          (let [f (get @method-table (method msg) method-not-found)
-                result (f msg)]
-            (send-message-async!
-              component (->response-msg (id msg) result) nil))
+              msg/+response+
+              (let [f (:fn (get @message-table (id msg)))]
+                (swap! message-table dissoc (id msg))
+                ;; Don't block the handler to execute this.
+                (async/thread (when f (f (value msg)))))
 
-          msg/+notify+
-          (let [f (get @method-table (method msg) method-not-found)
-                result (f msg)]))
+              msg/+request+
+              (let [f (get @method-table (method msg) method-not-found)
+                    ;; TODO - add async/thread here, remove from methods.
+                    result (f msg)]
+                (send-message-async!
+                  component (->response-msg (id msg) result) nil))
 
-        (recur))))
+              msg/+notify+
+              (let [f (get @method-table (method msg) method-not-found)
+                    ;; TODO - see above.
+                    result (f msg)]))
+
+            (recur)))
+        (catch Throwable t (log/info
+                             "Exception in message handler, aborting!"
+                             t))))
+
     component))

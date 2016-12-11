@@ -4,20 +4,26 @@
 (def +response+ 1)
 (def +notify+ 2)
 
+(let [last-id (atom 0)]
+  (defn next-id
+    []
+    (swap! last-id inc)
+    @last-id))
+
 (defn gen-msg-id
   "Get a unique message id."
   []
-  (System/nanoTime))
+  (next-id))
 
 (defn ->request-msg
   "Construct a msgpack-rpc request message."
   [type args]
-  [0 (gen-msg-id) type args])
+  [+request+ (gen-msg-id) type args])
 
 (defn ->response-msg
   "Construct a msgpack-rpc response message."
   [id result]
-  [1 id nil result])
+  [+response+ id nil result])
 
 ;; TODO - find better way to get [B type.
 (def byte-array-type (type (.getBytes "foo")))
