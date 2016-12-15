@@ -108,7 +108,7 @@
   "Returns a channel which will contain true if the buffer is currently
   visible."
   [nvim buffer-name]
-  (async/go
+  (async/thread
     (let [visible-buffers (map (comp #(buffer-get-name nvim %)
                                      #(window-get-buffer nvim %))
                                (vim-get-windows nvim))]
