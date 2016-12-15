@@ -4,7 +4,8 @@
             [clojure.tools.logging :as log]
             [neovim-client.message :as message :refer [->request-msg]]
             [neovim-client.rpc :as rpc])
-  (:import (java.net Socket)))
+  (:import (java.net Socket)
+           (com.etsy.net UnixDomainSocketClient JUDS)))
 
 (defmacro defvim
   [fn-name vim-command & args]
@@ -117,19 +118,24 @@
 (def stop rpc/stop)
 
 (defn new*
-  [input output debug]
+  [input output update-nvim-channel?]
   (let [component (rpc/new input output)]
-    ;; Each time you connect to the same nvim instance using a tcp socket, nvim
+    ;; Each time you connect to the same nvim instance using a socket, nvim
     ;; allocates a new channel.
-    (when debug
-      (let [api-info (vim-get-api-info component)]
-        (vim-command component (format "let g:nvim_tcp_plugin_channel = %s"
-                                       (first api-info)))))
+    (when update-nvim-channel?
+      (async/thread
+        (let [api-info (vim-get-api-info component)]
+          (vim-command component (format "let g:nvim_tcp_plugin_channel = %s"
+                                         (first api-info))))))
     component))
 
 (defn new
-  "Connect to msgpack-rpc channel via standard io or TCP socket."
-  ([] (new* System/in System/out false))
+  "Connect to msgpack-rpc channel via standard io, TCP socket, Unix domain
+  sockets."
+  ([] (new* System/in System/out true))
+  ([uds-filepath]
+   (let [socket (UnixDomainSocketClient. uds-filepath JUDS/SOCK_STREAM)]
+     (new* (.getInputStream socket) (.getOutputStream socket) true)))
   ([host port]
    (log/info "plugin host connecting to nvim at " host ":" port)
    (let [socket (java.net.Socket. host port)]
