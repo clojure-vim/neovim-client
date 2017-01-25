@@ -1,5 +1,51 @@
-global-state
-	[X] finish refactoring nvim, rpc
-	[X] from debug session, stop, then start (restart) should work
-	[X] make sure sample plugins still work
-	[_] clojure socket repl plugin refactor
+Versioning
+	re: https://github.com/neovim/neovim/pull/5535
+	re: https://github.com/neovim/neovim/pull/5386
+
+	[_] an we start writing tests for these things?
+		[X] We'd have to start an nvim --embed, and maybe specify the NVIM_... ? 
+		[X] Then, we connect
+		[X] Test version validation
+		[_] Integration test
+			-insert some text in current buffer
+			-command split the a new buffer put some stuff in it
+			-command switch back to the original buffer
+			-get the text of current buffer
+
+		Tough to figure out exactly how to test against multiple version of
+		Neovim's API. For now, let's just do this basic test, and document
+		the version of Neovim used.
+
+	Following the philosophy described above, we need
+		[_] Make the user specify required API level on `connect`
+
+		[_] Change the api to one function `exec`, pass the op as the first
+		arg, and then use varargs, or a collection of args.
+			Implementing `exec` and `exec-async` should include
+			version-supported? check, maybe assume nvim_command will always
+			be supported.
+
+		[_] On `connect`, intern dynamically created functions similar to the
+		macros we use now.
+
+		[_] Change the existing samples to use this, maybe only support one
+		sample.
+
+		[_] Make a `doc` function that basically does `ns-publics`
+
+		[_] Update the docs, including video?
+			In terms of the docs, we'll take a similar approach that other
+			AWS client libs have taken, we'll steer them heavily toward
+			the *actual* docs, and using `nvim-get-api-info`.
+
+		[_] Tag the existing version, bump the version (project & github),
+		and release.
+
+	Why aren't we doing anything statically?
+		Although I'd prefer actual functions in source code, I don't like
+			That I'd have to change code when they version the API
+			But, more importantly, since the api_level supports a range of
+			levels, I'd either
+				have to support side-by-side versions
+					but that would be easy with codegen & ns2, ns3, etc.
+				make patches to all versions, if version by api-level

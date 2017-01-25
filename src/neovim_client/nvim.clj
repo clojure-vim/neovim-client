@@ -7,6 +7,9 @@
   (:import (java.net Socket)
            (com.etsy.net UnixDomainSocketClient JUDS)))
 
+(declare exec)
+(declare exec-async)
+
 (defmacro defvim
   [fn-name vim-command & args]
   `(do
@@ -117,27 +120,38 @@
 (def register-method! rpc/register-method!)
 (def stop rpc/stop)
 
+(defn version-supported?
+  [component]
+  (let [desired-version (:version component)
+        [channel api-info] @(:api-info component)
+        {:strs [version]} api-info
+        {:strs [api_prerelease api_level api_compatible]} version
+        min-version api_compatible
+        max-version (if api_prerelease (dec api_level) api_level)]
+    (<= min-version desired-version max-version)))
+
 (defn new*
-  [input output update-nvim-channel?]
+  [version input output update-nvim-channel?]
   (let [component (rpc/new input output)]
     ;; Each time you connect to the same nvim instance using a socket, nvim
     ;; allocates a new channel.
-    (when update-nvim-channel?
-      (async/thread
-        (let [api-info (vim-get-api-info component)]
+    (async/thread
+      (let [api-info (vim-get-api-info component)]
+        (deliver (:api-info component) api-info)
+        (when update-nvim-channel?
           (vim-command component (format "let g:nvim_tcp_plugin_channel = %s"
                                          (first api-info))))))
-    component))
+    (assoc component :version version)))
 
 (defn new
   "Connect to msgpack-rpc channel via standard io, TCP socket, Unix domain
   sockets."
-  ([] (new* System/in System/out true))
-  ([uds-filepath]
+  ([version] (new* version System/in System/out true))
+  ([version uds-filepath]
    (let [socket (UnixDomainSocketClient. uds-filepath JUDS/SOCK_STREAM)]
-     (new* (.getInputStream socket) (.getOutputStream socket) true)))
-  ([host port]
+     (new* version (.getInputStream socket) (.getOutputStream socket) true)))
+  ([version host port]
    (log/info "plugin host connecting to nvim at " host ":" port)
    (let [socket (java.net.Socket. host port)]
      (.setTcpNoDelay socket true)
-     (new* (.getInputStream socket) (.getOutputStream socket) true))))
+     (new* version (.getInputStream socket) (.getOutputStream socket) true))))

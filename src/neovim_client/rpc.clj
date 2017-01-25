@@ -82,7 +82,9 @@
         input-stream (DataInputStream. input-stream)
         message-table (atom {})
         method-table (atom {})
-        component {:input-stream input-stream
+        component {:version nil
+                   :api-info (promise)
+                   :input-stream input-stream
                    :output-stream output-stream
                    :out-chan (create-output-channel output-stream) 
                    :in-chan in-chan
