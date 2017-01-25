@@ -2,11 +2,11 @@ Versioning
 	re: https://github.com/neovim/neovim/pull/5535
 	re: https://github.com/neovim/neovim/pull/5386
 
-	[_] an we start writing tests for these things?
+	[X] an we start writing tests for these things?
 		[X] We'd have to start an nvim --embed, and maybe specify the NVIM_... ? 
 		[X] Then, we connect
 		[X] Test version validation
-		[_] Integration test
+		[X] Integration test
 			-insert some text in current buffer
 			-command split the a new buffer put some stuff in it
 			-command switch back to the original buffer
@@ -17,7 +17,7 @@ Versioning
 		the version of Neovim used.
 
 	Following the philosophy described above, we need
-		[_] Make the user specify required API level on `connect`
+		[X] Make the user specify required API level on `connect`
 
 		[_] Change the api to one function `exec`, pass the op as the first
 		arg, and then use varargs, or a collection of args.

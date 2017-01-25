@@ -48,5 +48,17 @@
       (is (client.nvim/version-supported?
             (client.nvim/new* 1 in out false))))))
 
+(deftest change-buffer-text
+  (with-neovim
+    (let [{:keys [in out]} *neovim*
+          conn (client.nvim/new* 1 in out false)]
+      (let [b1 (client.nvim/vim-get-current-buffer conn)
+            _ (client.nvim/buffer-set-line conn b1 0 "foo")
+            _ (client.nvim/vim-command conn "new")
+            b2 (client.nvim/vim-get-current-buffer conn)
+            _ (client.nvim/buffer-set-line conn b2 0 "bar")]
+        (is (= "foo" (client.nvim/buffer-get-line conn b1 0)))
+        (is (= "bar") (client.nvim/buffer-get-line conn b2 0))))))
+
 #_(clojure.tools.namespace.repl/refresh)
 #_(clojure.test/run-tests 'neovim-client.nvim-test)
