@@ -8,7 +8,9 @@
     [neovim-client.1.api.window :as api.window]))
 
 (defn get-cursor-location
-  "Gets the cursor's current position as a tuple (row, col)."
+  "Gets the cursor's current position as a tuple (row, col).
+  row - starts at 1
+  col - starts at 0"
   [nvim]
   (api.window/get-cursor nvim (api/get-current-win nvim)))
 

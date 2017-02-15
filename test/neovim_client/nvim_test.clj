@@ -2,26 +2,8 @@
   (:require [clojure.test :as test :refer [deftest use-fixtures is]]
             [neovim-client.1.api :as api]
             [neovim-client.1.api.buffer :as api.buffer]
-            [neovim-client.nvim :as client.nvim]))
-
-(defn- neovim
-  "Make a neovim subprocess."
-  []
-  (let [p (.exec (Runtime/getRuntime) "nvim --embed")]
-    {:process p
-     :in (.getInputStream p)
-     :out (.getOutputStream p)}))
-
-(defn- stop-neovim
-  [{:keys [process]}]
-  (.destroy process))
-
-(defmacro with-neovim
-  [& body]
-  `(let [~'*neovim* (neovim)]
-     (try
-       ~@body
-       (finally (stop-neovim ~'*neovim*)))))
+            [neovim-client.nvim :as client.nvim]
+            [neovim-client.test-helper :refer [with-neovim stop-neovim]]))
 
 ;; TODO - this one will be hard to test. From the client-library's perspective,
 ;; it will always have access to standard out. If it runs at all, standard
@@ -63,7 +45,3 @@
             _ (api.buffer/set-lines conn b2 0 1 false ["bar"])]
         (is (= ["foo"] (api.buffer/get-lines conn b1 0 1 false)))
         (is (= ["bar"] (api.buffer/get-lines conn b2 0 1 false)))))))
-
-#_(clojure.tools.namespace.repl/refresh)
-#_(clojure.test/run-tests 'neovim-client.nvim-test)
-#_(neovim-client.nvim-test/change-buffer-text)
