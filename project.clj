@@ -14,5 +14,6 @@
                  [clj-logging-config "1.9.12"]
                  [clojure-msgpack "1.2.0"]
                  [uk.co.caprica/juds "0.94.1"]]
+  :src-paths ["src" "test"]
   :repl-options {:init-ns neovim-client.nvim}
   :target-path "target/%s")

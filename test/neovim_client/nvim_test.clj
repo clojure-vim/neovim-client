@@ -1,5 +1,7 @@
 (ns neovim-client.nvim-test
   (:require [clojure.test :as test :refer [deftest use-fixtures is]]
+            [neovim-client.1.api :as api]
+            [neovim-client.1.api.buffer :as api.buffer]
             [neovim-client.nvim :as client.nvim]))
 
 (defn- neovim
@@ -30,35 +32,38 @@
 (deftest connect
   (with-neovim
     (let [{:keys [in out]} *neovim*]
-      (is (not (client.nvim/version-supported?
-                 (client.nvim/new* -1 in out false))))))
+      (is (thrown-with-msg?
+            Throwable
+            #"version not supported"
+            (client.nvim/new* -1 in out false)))))
 
   (with-neovim
     (let [{:keys [in out]} *neovim*]
-      (is (not (client.nvim/version-supported?
-                 (client.nvim/new* 2 in out false))))))
+      (is (thrown-with-msg?
+            Throwable
+            #"version not supported"
+            (client.nvim/new* 2 in out false)))))
 
   (with-neovim
     (let [{:keys [in out]} *neovim*]
-      (is (client.nvim/version-supported?
-            (client.nvim/new* 0 in out false)))))
+      (is (client.nvim/new* 0 in out false))))
 
   (with-neovim
     (let [{:keys [in out]} *neovim*]
-      (is (client.nvim/version-supported?
-            (client.nvim/new* 1 in out false))))))
+      (is (client.nvim/new* 1 in out false)))))
 
 (deftest change-buffer-text
   (with-neovim
     (let [{:keys [in out]} *neovim*
           conn (client.nvim/new* 1 in out false)]
-      (let [b1 (client.nvim/vim-get-current-buffer conn)
-            _ (client.nvim/buffer-set-line conn b1 0 "foo")
-            _ (client.nvim/vim-command conn "new")
-            b2 (client.nvim/vim-get-current-buffer conn)
-            _ (client.nvim/buffer-set-line conn b2 0 "bar")]
-        (is (= "foo" (client.nvim/buffer-get-line conn b1 0)))
-        (is (= "bar") (client.nvim/buffer-get-line conn b2 0))))))
+      (let [b1 (api/get-current-buf conn)
+            _ (api.buffer/set-lines conn b1 0 1 false ["foo"])
+            _ (api/command conn "new")
+            b2 (api/get-current-buf conn)
+            _ (api.buffer/set-lines conn b2 0 1 false ["bar"])]
+        (is (= ["foo"] (api.buffer/get-lines conn b1 0 1 false)))
+        (is (= ["bar"] (api.buffer/get-lines conn b2 0 1 false)))))))
 
 #_(clojure.tools.namespace.repl/refresh)
 #_(clojure.test/run-tests 'neovim-client.nvim-test)
+#_(neovim-client.nvim-test/change-buffer-text)

@@ -19,17 +19,35 @@ Versioning
 	Following the philosophy described above, we need
 		[X] Make the user specify required API level on `connect`
 
-		[_] Change the api to one function `exec`, pass the op as the first
+		[X] Change the api to one function `exec`, pass the op as the first
 		arg, and then use varargs, or a collection of args.
 			Implementing `exec` and `exec-async` should include
 			version-supported? check, maybe assume nvim_command will always
 			be supported.
 
-		[_] On `connect`, intern dynamically created functions similar to the
-		macros we use now.
+		Switching strategies to just generating everything statically.
+			[X] namespace will be neovim-client/api/<api-level>/...
+			[X] store the api doc in resources
+			[X] look at the api doc, find the minimum supported version,
+			start there, make a pass for each version up to the max version
+			[X] Change intern to defn
+			[X] Spit each namespace to a file (for each version)
+			[X] Fix 0/api/api.clj
+			[X] Add namespace w/ require to codegen
+			[X] redo tests
+
+		[X] Remove existing code in nvim.clj
+			[X] custom.clj -> 1/api_ext.clj, 1/api/buffer_ext.clj, etc
+			[_] unit test each one, will give us some sort of test coverage
+				[_] buffer-ext
+				[_] api-ext
+			of a "useful" or at least "used" set of functionality
 
 		[_] Change the existing samples to use this, maybe only support one
 		sample.
+
+		[_] In the README, document which api_levels are supported, and
+		which version of nvim was used to generate the code from
 
 		[_] Make a `doc` function that basically does `ns-publics`
 
@@ -41,11 +59,4 @@ Versioning
 		[_] Tag the existing version, bump the version (project & github),
 		and release.
 
-	Why aren't we doing anything statically?
-		Although I'd prefer actual functions in source code, I don't like
-			That I'd have to change code when they version the API
-			But, more importantly, since the api_level supports a range of
-			levels, I'd either
-				have to support side-by-side versions
-					but that would be easy with codegen & ns2, ns3, etc.
-				make patches to all versions, if version by api-level
+		[_] Upgrade clojure socket repl to use it?
