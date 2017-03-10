@@ -22,7 +22,7 @@ NVIM_LISTEN_ADDRESS=127.0.0.1:7777 nvim
 
 ```
 
-From the repository director:
+From the repository directory:
 
 ```
 $> lein repl
