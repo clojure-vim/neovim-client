@@ -1,22 +1,29 @@
 # neovim-client
 
-A Neovim client library for creating plugins written in Clojure.
+A client library for creating Neovim plugins written in Clojure.
 
-## Supported API Versions
+## Neovim API Versions (Levels)
 
-;; TODO table, showing version of neovim-client version, neovim version (used
-;; to generate metadata, and api levels supported
+Neovim's RPC API is
+[versioned separately](https://github.com/neovim/neovim/pull/5535) from
+Neovim itslef, using a monotonically increasing integer. The API's version is
+tracked using a value called `api_level`, which can be found by examining the
+output of `:echo api_info()`.
+
+Currently, levels 0 - 1 are supported.
+
+In the future, this library can be updated to support a new level by:
+
+* Updating the API metadata `$> nvim --api-info > resources/api-info.mp`
+
+* Generating code from the metadata using `neovim-client.parser/generate`
 
 ## Dependencies
 
-### Neovim
+* [Neovim](https://github.com/neovim/neovim)
 
-;; TODO finish this section
-[Neovim](https://github.com/neovim/neovim)
-
-### Java
-
-You've probably already got this if you're using Clojure. Version 1.6 or later is required.
+* [Java Development Kit](http://www.oracle.com/technetwork/java/javase/overview/)
+  (JDK) Standard Edition (SE) version 8
 
 ## Usage
 
