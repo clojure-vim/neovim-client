@@ -86,8 +86,14 @@ In the future, this library can be updated to support a new level by:
 
 * Generate code for api_level 0 - 1 from metadata generated using Neovim
 version 0.2.0
+
 * Hand-written functions moved to `-ext` namespaces
+
 * Added unit tests which use `nvim --embed` process
+
+* Support Unix Domain Sockets
+
+* Verify api_level available on connection
 
 ## Future
 
