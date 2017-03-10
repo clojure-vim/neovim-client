@@ -8,3 +8,7 @@
 (defn get-lines-async
   [nvim buffer start end f]
   (api.buffer/get-lines-async nvim buffer start end false f))
+
+(defn set-lines
+  [nvim buffer start end lines]
+  (api.buffer/set-lines nvim buffer start end false lines))
