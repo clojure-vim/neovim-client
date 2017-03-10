@@ -24,7 +24,7 @@
   [component op & args]
   (rpc/send-message-async!
     component
-    (message/->request-msg op (vec (rest args)))
+    (message/->request-msg op (vec (butlast args)))
     (last args)))
 
 (def register-method! rpc/register-method!)
