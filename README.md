@@ -40,23 +40,18 @@ neovim-client.nvim=> (api/command ":echo 'Hello Neovim!'")
 
 [![Repling Neovim](http://img.youtube.com/vi/g-9DdVwbSTo/0.jpg)](https://www.youtube.com/watch?v=g-9DdVwbSTo)
 
-### Sample Plugins
+### Examples
 
-Several sample plugins -- consumers of neovim-client -- are included.
+#### Included Sample Plugin
 
-#### Installation
+##### Installation
 
-While these plugins can be installed locally, the easiest thing to do is to
-run them from the repl, as described above. Simply use `lein repl` from the
-plugin project's root directory.
+One way to install the sample plugin is by running `./deploy-local.sh` script,
+included, which copies the sample plugin to `~/.vim/bundle`, and then ensure
+Neovim's runtimepath is set correctly by adding `set
+runtimepath^=~/.vim/bundle/sample-plugin` to `.vimrc`.
 
-#### Simple Plugin
-
-```
-:call RunSamplePluginSimple()
-```
-
-#### Count Plugin
+##### Running
 
 This plugin stays running, and maintains state. Additionally, it shows how
 plugins are actually servers, which Neovim can make requests to via
