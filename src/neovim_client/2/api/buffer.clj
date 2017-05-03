@@ -1,4 +1,4 @@
-(ns neovim-client.1.api.buffer (:require [neovim-client.nvim]))
+(ns neovim-client.2.api.buffer (:require [neovim-client.nvim]))
 
 (defn line-count [component buffer] (neovim-client.nvim/exec component "nvim_buf_line_count" buffer))
 
@@ -15,6 +15,10 @@
 (defn get-var [component buffer name] (neovim-client.nvim/exec component "nvim_buf_get_var" buffer name))
 
 (defn get-var-async [component buffer name f] (neovim-client.nvim/exec-async component "nvim_buf_get_var" buffer name f))
+
+(defn get-changedtick [component buffer] (neovim-client.nvim/exec component "nvim_buf_get_changedtick" buffer))
+
+(defn get-changedtick-async [component buffer f] (neovim-client.nvim/exec-async component "nvim_buf_get_changedtick" buffer f))
 
 (defn set-var [component buffer name value] (neovim-client.nvim/exec component "nvim_buf_set_var" buffer name value))
 

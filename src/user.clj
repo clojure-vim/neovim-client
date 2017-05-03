@@ -7,7 +7,7 @@
 (defn tcp-connection
   "Get an nvim connection."
   []
-  (nvim/new 1 "localhost" 7777))
+  (nvim/new 2 "localhost" 7777))
 
 (defn run-tests
   "Run all tests with clojure.test"

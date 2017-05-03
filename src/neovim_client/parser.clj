@@ -3,6 +3,7 @@
   (:require
     [clojure.java.io :as io]
     [clojure.string :as string]
+    [clojure.walk :as walk]
     [msgpack.clojure-extensions]
     [msgpack.core :as msgpack]))
 
@@ -99,9 +100,12 @@
 
 (defn api-info-resource
   []
-  (msgpack/unpack (-> "api-info.mp"
-                      clojure.java.io/resource
-                      clojure.java.io/input-stream)))
+  (->> (msgpack/unpack (-> "api-info.mp"
+                           clojure.java.io/resource
+                           clojure.java.io/input-stream))
+       (walk/postwalk (fn [f] (if (bytes? f)
+                                (String. f)
+                                f)))))
 
 (defn require-expr
   [ns]
