@@ -28,7 +28,7 @@ From the repository directory:
 $> lein repl
 user=> (def c (tcp-connection))
 user=> (require '[neovim-client.1.api :as api])
-user=> (api/command ":echo 'Hello Neovim!'")
+user=> (api/command c ":echo 'Hello Neovim!'")
 ...
 ```
 
