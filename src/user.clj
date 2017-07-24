@@ -2,7 +2,9 @@
   (:require
     [clojure.test]
     [clojure.tools.namespace.repl :refer [refresh]]
-    [neovim-client.nvim :as nvim]))
+    [neovim-client.nvim :as nvim]
+    [neovim-client.1.api :as api]
+    [neovim-client.1.api.buffer-ext :as api.buffer-ext]))
 
 (defn tcp-connection
   "Get an nvim connection."
