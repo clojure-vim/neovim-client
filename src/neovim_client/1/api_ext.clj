@@ -20,6 +20,16 @@
   (string/join "\n" (api.buffer-ext/get-lines
                       nvim (api/get-current-buf nvim) 0 -1)))
 
+(defn get-current-buffer-text-async
+  "Convenience function to get the current buffer's text asynchronously."
+  [nvim f]
+  (api/get-current-buf-async
+    nvim
+    (fn [buf]
+      (api.buffer-ext/get-lines-async
+        nvim buf 0 -1
+        (fn [lines] (f (string/join "\n" lines))))))) 
+
 (defn get-current-word-async
   "Get the current word asynchronously."
   [nvim f]
@@ -34,3 +44,9 @@
                                      #(api.window/get-buf nvim %))
                                (api/list-wins nvim))]
       ((set visible-buffers) buffer-name))))
+
+(defn set-current-buffer-text
+  "Sets the current buffer's contents."
+  [nvim text]
+  (api.buffer-ext/set-lines
+    nvim (api/get-current-buf nvim) 0 -1 (string/split-lines text)))

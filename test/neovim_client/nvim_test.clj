@@ -24,7 +24,7 @@
       (is (thrown-with-msg?
             Throwable
             #"version not supported"
-            (client.nvim/new* 2 in out false)))))
+            (client.nvim/new* Integer/MAX_VALUE in out false)))))
 
   (with-neovim
     (let [{:keys [in out]} *neovim*]
