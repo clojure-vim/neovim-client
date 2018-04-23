@@ -76,6 +76,25 @@
   (.close input-stream)
   (log/info "input and output streams closed"))
 
+(defn- handle-response [message-table msg]
+  (let [msg-id (id msg)
+        msg-value (value msg)
+        {f :fn} (get @message-table msg-id)]
+    (swap! message-table dissoc msg-id)
+    (when f (f msg-value))))
+
+(defn- handle-request [component method-table msg]
+  (let [msg-method (method msg)
+        msg-id (id msg)
+        f (get @method-table msg-method method-not-found)
+        result (f msg)
+        response-msg (->response-msg msg-id result)]
+    (send-message-async! component response-msg nil)))
+
+(defn- handle-notify [method-table msg]
+  (let [f (get @method-table (method msg) method-not-found)]
+    (f msg)))
+
 (defn new
   [input-stream output-stream]
   (let [in-chan (create-input-channel input-stream)
@@ -84,7 +103,7 @@
         method-table (atom {})
         component {:input-stream input-stream
                    :output-stream output-stream
-                   :out-chan (create-output-channel output-stream) 
+                   :out-chan (create-output-channel output-stream)
                    :in-chan in-chan
                    :message-table message-table
                    :method-table method-table}]
@@ -97,26 +116,17 @@
             (condp = (msg-type msg)
 
               msg/+response+
-              (let [f (:fn (get @message-table (id msg)))]
-                (swap! message-table dissoc (id msg))
-                ;; Don't block the handler to execute this.
-                (async/thread (when f (f (value msg)))))
+              (async/thread-call #(handle-response message-table msg))
 
               msg/+request+
-              (let [f (get @method-table (method msg) method-not-found)
-                    ;; TODO - add async/thread here, remove from methods.
-                    result (f msg)]
-                (send-message-async!
-                  component (->response-msg (id msg) result) nil))
+              (async/thread-call #(handle-request component method-table msg))
 
               msg/+notify+
-              (let [f (get @method-table (method msg) method-not-found)
-                    ;; TODO - see above.
-                    result (f msg)]))
+              (async/thread-call #(handle-notify method-table msg)))
 
             (recur)))
         (catch Throwable t (log/info
-                             "Exception in message handler, aborting!"
-                             t))))
+                            "Exception in message handler, aborting!"
+                            t))))
 
     component))
