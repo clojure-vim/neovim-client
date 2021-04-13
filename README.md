@@ -42,7 +42,7 @@ Alternatively, if you've got tmux installed, you can use run the script
 `./tmux-run-dev.sh`, which will start Neovim, a repl, and execute similar
 setup code.
 
-I almost forgot Tmux's navigation keys.
+I almost forgot Tmux's navigation keys to switch between panes.
 
 ```Ctrl-b arrow keys```
 
