@@ -13,6 +13,9 @@ A client library for creating Neovim plugins written in Clojure.
 
 ## Usage
 
+<details>
+  <summary>Repl</summary>
+
 ### Repl
 
 Launch Neovim, explicitly setting the `NVIM_LISTEN_ADDRESS`
@@ -31,10 +34,21 @@ user=> (require '[neovim-client.1.api :as api])
 user=> (api/command c ":echo 'Hello Neovim!'")
 ...
 ```
-
+</details>
+<details>
+  <summary>Tmux + Repl</summary>
+  
 Alternatively, if you've got tmux installed, you can use run the script
 `./tmux-run-dev.sh`, which will start Neovim, a repl, and execute similar
 setup code.
+
+I almost forgot Tmux's navigation keys.
+
+```Ctrl-b arrow keys```
+
+Your Tmux setup might use a different leader key for commands. Maybe Ctrl-c
+
+</details>
 
 ### Examples
 
